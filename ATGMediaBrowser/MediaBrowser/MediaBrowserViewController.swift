@@ -24,6 +24,9 @@ public class MediaBrowserViewController: UIViewController {
     private enum Constants {
 
         static let gapBetweenContents: CGFloat = 50.0
+        static let minimumVelocity: CGFloat = 15.0
+        static let minimumTranslation: CGFloat = 0.1
+        static let animationDuration: Double = 0.17
     }
 
     public enum GestureDirection {
@@ -132,13 +135,34 @@ extension MediaBrowserViewController {
             moveViews(by: CGPoint(x: translation.x - previousTranslation.x, y: translation.y - previousTranslation.y))
         case .ended, .failed, .cancelled:
             let velocity = recognizer.velocity(in: view)
-            print("Terminal velocity : ", velocity)
 
-            // TODO:
-            if velocity.x < 0.0 {
+            var viewsCopy = contentViews
+            let previousView = viewsCopy.removeFirst()
+            let middleView = viewsCopy.removeFirst()
+            let nextView = viewsCopy.removeFirst()
 
+            var toMove: CGFloat = 0.0
+            let directionalVelocity = gestureDirection == .horizontal ? velocity.x : velocity.y
+
+            if fabs(directionalVelocity) < Constants.minimumVelocity &&
+                fabs(middleView.position) < Constants.minimumTranslation {
+                toMove = -middleView.position
+            } else if directionalVelocity < 0.0 {
+                if middleView.position >= 0.0 {
+                    toMove = -middleView.position
+                } else {
+                    toMove = -nextView.position
+                }
             } else {
+                if middleView.position <= 0.0 {
+                    toMove = -middleView.position
+                } else {
+                    toMove = -previousView.position
+                }
+            }
 
+            UIView.animate(withDuration: Constants.animationDuration) { [weak self] in
+                self?.contentViews.forEach({ $0.position += toMove })
             }
         default:
             break
@@ -154,8 +178,6 @@ extension MediaBrowserViewController {
 
     private func moveViews(by translation: CGPoint) {
 
-        print("Translation registered : ", translation)
-
         let viewSizeIncludingGap = CGSize(
             width: view.frame.size.width + gapBetweenMediaViews,
             height: view.frame.size.height + gapBetweenMediaViews
@@ -170,9 +192,9 @@ extension MediaBrowserViewController {
         })
 
         var viewsCopy = contentViews
-        let leftView = viewsCopy.removeFirst()
+        let previousView = viewsCopy.removeFirst()
         let middleView = viewsCopy.removeFirst()
-        let rightView = viewsCopy.removeFirst()
+        let nextView = viewsCopy.removeFirst()
 
         let viewSize = (gestureDirection == .horizontal) ? viewSizeIncludingGap.width : viewSizeIncludingGap.height
 
@@ -183,21 +205,21 @@ extension MediaBrowserViewController {
 
         if middleView.position < -(normalizedGap + normalizedCenter) {
 
-            // Left item is taken and placed on right most side
-            leftView.position += CGFloat(viewCount)
-            leftView.index += viewCount
+            // Previous item is taken and placed on right/down most side
+            previousView.position += CGFloat(viewCount)
+            previousView.index += viewCount
 
             contentViews.removeFirst()
-            contentViews.append(leftView)
+            contentViews.append(previousView)
 
         } else if middleView.position > (1 + normalizedGap - normalizedCenter) {
 
-            // Right item is taken and placed on left most side
-            rightView.position -= CGFloat(viewCount)
-            rightView.index -= viewCount
+            // Next item is taken and placed on left/top most side
+            nextView.position -= CGFloat(viewCount)
+            nextView.index -= viewCount
 
             contentViews.removeLast()
-            contentViews.insert(rightView, at: 0)
+            contentViews.insert(nextView, at: 0)
         }
     }
 }
