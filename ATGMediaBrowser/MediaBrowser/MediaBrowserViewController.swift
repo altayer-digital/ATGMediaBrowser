@@ -38,6 +38,7 @@ public class MediaBrowserViewController: UIViewController {
             contentViews.forEach({ $0.updateTransform() })
         }
     }
+    public var browserStyle: BrowserStyle = .carousel
     public weak var dataSource: MediaBrowserViewControllerDataSource?
     public weak var delegate: MediaBrowserViewControllerDelegate?
 
@@ -55,6 +56,12 @@ public class MediaBrowserViewController: UIViewController {
         case vertical
     }
 
+    public enum BrowserStyle {
+
+        case linear
+        case carousel
+    }
+
     private var contentViews: [MediaContentView] = []
 
     private var previousTranslation: CGPoint = .zero
@@ -67,6 +74,10 @@ public class MediaBrowserViewController: UIViewController {
         gesture.addTarget(self, action: #selector(panGestureEvent(_:)))
         return gesture
     }()
+
+    private var numMediaItems: Int {
+        return dataSource?.numberOfItems(in: self) ?? 1
+    }
 
     // MARK: - Initializers
     public init() {
@@ -152,7 +163,7 @@ extension MediaBrowserViewController {
 
         switch recognizer.state {
         case .began:
-            previousTranslation = translation // TODO: Revisit and decide if fallthrough is needed.
+            previousTranslation = translation
         case .changed:
             moveViews(by: CGPoint(x: translation.x - previousTranslation.x, y: translation.y - previousTranslation.y))
         case .ended, .failed, .cancelled:
@@ -200,17 +211,19 @@ extension MediaBrowserViewController {
 
     private func moveViews(by translation: CGPoint) {
 
+        let isGestureHorizontal = (gestureDirection == .horizontal)
+
         let viewSizeIncludingGap = CGSize(
             width: view.frame.size.width + gapBetweenMediaViews,
             height: view.frame.size.height + gapBetweenMediaViews
         )
 
-        let normalizedTranslation = CGPoint(
-            x: (translation.x)/viewSizeIncludingGap.width,
-            y: (translation.y)/viewSizeIncludingGap.height
+        let normalizedTranslation = calculateNormalizedTranslation(
+            translation: translation,
+            viewSize: viewSizeIncludingGap
         )
         contentViews.forEach({
-            $0.position += (gestureDirection == .horizontal ? normalizedTranslation.x : normalizedTranslation.y)
+            $0.position += isGestureHorizontal ? normalizedTranslation.x : normalizedTranslation.y
         })
 
         var viewsCopy = contentViews
@@ -218,11 +231,9 @@ extension MediaBrowserViewController {
         let middleView = viewsCopy.removeFirst()
         let nextView = viewsCopy.removeFirst()
 
-        let viewSize = (gestureDirection == .horizontal) ? viewSizeIncludingGap.width : viewSizeIncludingGap.height
-
+        let viewSize = isGestureHorizontal ? viewSizeIncludingGap.width : viewSizeIncludingGap.height
         let normalizedGap = gapBetweenMediaViews/viewSize
         let normalizedCenter = (middleView.frame.size.width / viewSize) * 0.5
-
         let viewCount = contentViews.count
 
         if middleView.position < -(normalizedGap + normalizedCenter) {
@@ -251,11 +262,34 @@ extension MediaBrowserViewController {
         }
     }
 
+    private func calculateNormalizedTranslation(translation: CGPoint, viewSize: CGSize) -> CGPoint {
+
+        let middleView = contentViews[1]
+
+        var normalizedTranslation = CGPoint(
+            x: (translation.x)/viewSize.width,
+            y: (translation.y)/viewSize.height
+        )
+
+        if browserStyle != .carousel {
+            let isGestureHorizontal = (gestureDirection == .horizontal)
+            let directionalTranslation = isGestureHorizontal ? normalizedTranslation.x : normalizedTranslation.y
+            if (middleView.index == 0 && ((middleView.position + directionalTranslation) > 0.0)) ||
+                (middleView.index == (numMediaItems - 1) && (middleView.position + directionalTranslation) < 0.0) {
+                if isGestureHorizontal {
+                    normalizedTranslation.x = -middleView.position
+                } else {
+                    normalizedTranslation.y = -middleView.position
+                }
+            }
+        }
+        return normalizedTranslation
+    }
+
     private func updateContents(of contentView: MediaContentView) {
 
         contentView.image = nil
-        let numberOfItems = dataSource?.numberOfItems(in: self) ?? 1
-        let convertedIndex = abs(contentView.index) % numberOfItems
+        let convertedIndex = abs(contentView.index) % numMediaItems
         dataSource?.mediaBrowser(self, imageAt: convertedIndex, completion: { (index, image) in
 
             if convertedIndex == index && image != nil {
