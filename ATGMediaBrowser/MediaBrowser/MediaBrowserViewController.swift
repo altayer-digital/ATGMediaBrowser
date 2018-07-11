@@ -38,7 +38,8 @@ public class MediaBrowserViewController: UIViewController {
             contentViews.forEach({ $0.updateTransform() })
         }
     }
-    public var browserStyle: BrowserStyle = .carousel
+
+    public var browserStyle: BrowserStyle = .linear
     public weak var dataSource: MediaBrowserViewControllerDataSource?
     public weak var delegate: MediaBrowserViewControllerDelegate?
 
@@ -47,7 +48,9 @@ public class MediaBrowserViewController: UIViewController {
         static let gapBetweenContents: CGFloat = 50.0
         static let minimumVelocity: CGFloat = 15.0
         static let minimumTranslation: CGFloat = 0.1
-        static let animationDuration: Double = 0.3
+        static let animationDuration = 0.3
+        static let updateFrameRate: CGFloat = 60.0
+        static let bounceFactor: CGFloat = 0.1
     }
 
     public enum GestureDirection {
@@ -65,6 +68,9 @@ public class MediaBrowserViewController: UIViewController {
     private var contentViews: [MediaContentView] = []
 
     private var previousTranslation: CGPoint = .zero
+
+    private var timer: Timer?
+    private var distanceToMove: CGFloat = 0.0
 
     lazy private var panGestureRecognizer: UIPanGestureRecognizer = { [unowned self] in
 
@@ -164,6 +170,9 @@ extension MediaBrowserViewController {
         switch recognizer.state {
         case .began:
             previousTranslation = translation
+            distanceToMove = 0.0
+            timer?.invalidate()
+            timer = nil
         case .changed:
             moveViews(by: CGPoint(x: translation.x - previousTranslation.x, y: translation.y - previousTranslation.y))
         case .ended, .failed, .cancelled:
@@ -194,8 +203,24 @@ extension MediaBrowserViewController {
                 }
             }
 
-            UIView.animate(withDuration: Constants.animationDuration) { [weak self] in
-                self?.contentViews.forEach({ $0.position += toMove })
+            if browserStyle == .linear {
+                if (middleView.index == 0 && ((middleView.position + toMove) > 0.0)) ||
+                    (middleView.index == (numMediaItems - 1) && (middleView.position + toMove) < 0.0) {
+
+                    toMove = -middleView.position
+                }
+            }
+
+            distanceToMove = toMove
+
+            if timer == nil {
+                timer = Timer.scheduledTimer(
+                    timeInterval: 1.0/Double(Constants.updateFrameRate),
+                    target: self,
+                    selector: #selector(update(_:)),
+                    userInfo: nil,
+                    repeats: true
+                )
             }
         default:
             break
@@ -209,9 +234,34 @@ extension MediaBrowserViewController {
 
 extension MediaBrowserViewController {
 
-    private func moveViews(by translation: CGPoint) {
+    @objc private func update(_ timeInterval: TimeInterval) {
 
-        let isGestureHorizontal = (gestureDirection == .horizontal)
+        guard distanceToMove != 0.0 else {
+
+            timer?.invalidate()
+            timer = nil
+            return
+        }
+
+        let distance = distanceToMove / (Constants.updateFrameRate * 0.1)
+        distanceToMove -= distance
+        moveViewsNormalized(by: CGPoint(x: distance, y: distance))
+
+        let translation = CGPoint(
+            x: distance * (view.frame.size.width + gapBetweenMediaViews),
+            y: distance * (view.frame.size.height + gapBetweenMediaViews)
+        )
+        let directionalTranslation = (gestureDirection == .horizontal) ? translation.x : translation.y
+        if fabs(directionalTranslation) < 0.1 {
+
+            moveViewsNormalized(by: CGPoint(x: distanceToMove, y: distanceToMove))
+            distanceToMove = 0.0
+            timer?.invalidate()
+            timer = nil
+        }
+    }
+
+    private func moveViews(by translation: CGPoint) {
 
         let viewSizeIncludingGap = CGSize(
             width: view.frame.size.width + gapBetweenMediaViews,
@@ -222,6 +272,14 @@ extension MediaBrowserViewController {
             translation: translation,
             viewSize: viewSizeIncludingGap
         )
+
+        moveViewsNormalized(by: normalizedTranslation)
+    }
+
+    private func moveViewsNormalized(by normalizedTranslation: CGPoint) {
+
+        let isGestureHorizontal = (gestureDirection == .horizontal)
+
         contentViews.forEach({
             $0.position += isGestureHorizontal ? normalizedTranslation.x : normalizedTranslation.y
         })
@@ -230,6 +288,11 @@ extension MediaBrowserViewController {
         let previousView = viewsCopy.removeFirst()
         let middleView = viewsCopy.removeFirst()
         let nextView = viewsCopy.removeFirst()
+
+        let viewSizeIncludingGap = CGSize(
+            width: view.frame.size.width + gapBetweenMediaViews,
+            height: view.frame.size.height + gapBetweenMediaViews
+        )
 
         let viewSize = isGestureHorizontal ? viewSizeIncludingGap.width : viewSizeIncludingGap.height
         let normalizedGap = gapBetweenMediaViews/viewSize
@@ -277,9 +340,9 @@ extension MediaBrowserViewController {
             if (middleView.index == 0 && ((middleView.position + directionalTranslation) > 0.0)) ||
                 (middleView.index == (numMediaItems - 1) && (middleView.position + directionalTranslation) < 0.0) {
                 if isGestureHorizontal {
-                    normalizedTranslation.x = -middleView.position
+                    normalizedTranslation.x *= Constants.bounceFactor
                 } else {
-                    normalizedTranslation.y = -middleView.position
+                    normalizedTranslation.y *= Constants.bounceFactor
                 }
             }
         }
