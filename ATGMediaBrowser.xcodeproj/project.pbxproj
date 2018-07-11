@@ -10,6 +10,7 @@
 		961F47B020FCBFF600DEF28F /* ATGMediaBrowser.h in Headers */ = {isa = PBXBuildFile; fileRef = 961F47AE20FCBFF600DEF28F /* ATGMediaBrowser.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		961F47B920FCC1E100DEF28F /* MediaContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961F47B720FCC1E100DEF28F /* MediaContentView.swift */; };
 		961F47BA20FCC1E100DEF28F /* MediaBrowserViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961F47B820FCC1E100DEF28F /* MediaBrowserViewController.swift */; };
+		9654793320FDF57A0084F303 /* ContentTransformers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9654793220FDF57A0084F303 /* ContentTransformers.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -18,6 +19,7 @@
 		961F47AF20FCBFF600DEF28F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		961F47B720FCC1E100DEF28F /* MediaContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaContentView.swift; sourceTree = "<group>"; };
 		961F47B820FCC1E100DEF28F /* MediaBrowserViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaBrowserViewController.swift; sourceTree = "<group>"; };
+		9654793220FDF57A0084F303 /* ContentTransformers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentTransformers.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +64,7 @@
 			children = (
 				961F47B720FCC1E100DEF28F /* MediaContentView.swift */,
 				961F47B820FCC1E100DEF28F /* MediaBrowserViewController.swift */,
+				9654793220FDF57A0084F303 /* ContentTransformers.swift */,
 			);
 			path = MediaBrowser;
 			sourceTree = "<group>";
@@ -146,6 +149,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				961F47BA20FCC1E100DEF28F /* MediaBrowserViewController.swift in Sources */,
+				9654793320FDF57A0084F303 /* ContentTransformers.swift in Sources */,
 				961F47B920FCC1E100DEF28F /* MediaContentView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -11,21 +11,7 @@
 //  Any reproduction of this material must contain this notice.
 //
 
-typealias ContentTransformer = (MediaContentView, CGFloat) -> Void
-
 internal class MediaContentView: UIScrollView {
-
-    static let horizontalMovement: ContentTransformer = { contentView, position in
-
-        let widthIncludingGap = contentView.frame.size.width + MediaContentView.interItemSpacing
-        contentView.transform = CGAffineTransform(translationX: widthIncludingGap * position, y: 0.0)
-    }
-
-    static let verticalMovement: ContentTransformer = { contentView, position in
-
-        let heightIncludingGap = contentView.frame.size.height + MediaContentView.interItemSpacing
-        contentView.transform = CGAffineTransform(translationX: 0.0, y: heightIncludingGap * position)
-    }
 
     internal static var interItemSpacing: CGFloat = 0.0
 
@@ -40,12 +26,25 @@ internal class MediaContentView: UIScrollView {
         }
     }
 
-    internal static var transformer: ContentTransformer = horizontalMovement
+    internal static var contentTransformer: ContentTransformer = DefaultContentTransformers.horizontalMoveInOut
+
+    internal var image: UIImage? {
+        didSet {
+            imageView.image = image
+        }
+    }
+
+    private lazy var imageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFit
+        imageView.clipsToBounds = true
+        return imageView
+    }()
 
     init(index itemIndex: Int) {
 
         self.index = itemIndex
-        self.position = CGFloat(itemIndex - 1)
+        self.position = CGFloat(itemIndex)
 
         super.init(frame: .zero)
 
@@ -59,12 +58,15 @@ internal class MediaContentView: UIScrollView {
 
     private func initialize() {
 
-        backgroundColor = [UIColor.purple, UIColor.green, UIColor.magenta][index]
+        backgroundColor = [UIColor.purple, UIColor.green, UIColor.magenta][index + 1]
+
+        addSubview(imageView)
+        imageView.frame = frame
     }
 
     internal func updateTransform() {
 
-        MediaContentView.transformer(self, position)
+        MediaContentView.contentTransformer(self, position)
     }
 
     private func updateContents() {

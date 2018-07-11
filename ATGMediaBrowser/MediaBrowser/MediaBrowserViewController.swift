@@ -11,6 +11,24 @@
 //  Any reproduction of this material must contain this notice.
 //
 
+public protocol MediaBrowserViewControllerDataSource: class {
+
+    typealias CompletionBlock = (Int, UIImage?) -> Void
+
+    func numberOfItems(in mediaBrowser: MediaBrowserViewController) -> Int
+    func mediaBrowser(_ mediaBrowser: MediaBrowserViewController, imageAt index: Int, completion: @escaping CompletionBlock)
+}
+
+public protocol MediaBrowserViewControllerDelegate: class {
+
+    func mediaBrowser(_ mediaBrowser: MediaBrowserViewController, didChangeFocusTo index: Int)
+}
+
+extension MediaBrowserViewControllerDelegate {
+
+    func mediaBrowser(_ mediaBrowser: MediaBrowserViewController, didChangeFocusTo index: Int) {}
+}
+
 public class MediaBrowserViewController: UIViewController {
 
     public var gestureDirection: GestureDirection = .horizontal
@@ -20,13 +38,15 @@ public class MediaBrowserViewController: UIViewController {
             contentViews.forEach({ $0.updateTransform() })
         }
     }
+    public weak var dataSource: MediaBrowserViewControllerDataSource?
+    public weak var delegate: MediaBrowserViewControllerDelegate?
 
     private enum Constants {
 
         static let gapBetweenContents: CGFloat = 50.0
         static let minimumVelocity: CGFloat = 15.0
         static let minimumTranslation: CGFloat = 0.1
-        static let animationDuration: Double = 0.17
+        static let animationDuration: Double = 0.3
     }
 
     public enum GestureDirection {
@@ -52,13 +72,11 @@ public class MediaBrowserViewController: UIViewController {
     public init() {
 
         super.init(nibName: nil, bundle: nil)
-        initialize()
     }
 
     public required init?(coder aDecoder: NSCoder) {
 
         super.init(coder: aDecoder)
-        initialize()
     }
 
     private func initialize() {
@@ -86,11 +104,12 @@ public class MediaBrowserViewController: UIViewController {
     private func populateContentViews() {
 
         MediaContentView.interItemSpacing = gapBetweenMediaViews
+        MediaContentView.contentTransformer = DefaultContentTransformers.horizontalMoveInOut
 
         contentViews.forEach({ $0.removeFromSuperview() })
         contentViews.removeAll()
 
-        for i in 0..<3 {
+        for i in -1...1 {
             let mediaView = MediaContentView(index: i)
             view.addSubview(mediaView)
             mediaView.translatesAutoresizingMaskIntoConstraints = false
@@ -102,7 +121,10 @@ public class MediaBrowserViewController: UIViewController {
             ])
 
             contentViews.append(mediaView)
+
+            updateContents(of: mediaView)
         }
+        view.bringSubview(toFront: contentViews[1])
     }
 
     // TODO: - Remove: Temporary Shit
@@ -208,18 +230,37 @@ extension MediaBrowserViewController {
             // Previous item is taken and placed on right/down most side
             previousView.position += CGFloat(viewCount)
             previousView.index += viewCount
+            updateContents(of: previousView)
 
             contentViews.removeFirst()
             contentViews.append(previousView)
+
+            delegate?.mediaBrowser(self, didChangeFocusTo: contentViews[1].index)
 
         } else if middleView.position > (1 + normalizedGap - normalizedCenter) {
 
             // Next item is taken and placed on left/top most side
             nextView.position -= CGFloat(viewCount)
             nextView.index -= viewCount
+            updateContents(of: nextView)
 
             contentViews.removeLast()
             contentViews.insert(nextView, at: 0)
+
+            delegate?.mediaBrowser(self, didChangeFocusTo: contentViews[1].index)
         }
+    }
+
+    private func updateContents(of contentView: MediaContentView) {
+
+        contentView.image = nil
+        let numberOfItems = dataSource?.numberOfItems(in: self) ?? 1
+        let convertedIndex = abs(contentView.index) % numberOfItems
+        dataSource?.mediaBrowser(self, imageAt: convertedIndex, completion: { (index, image) in
+
+            if convertedIndex == index && image != nil {
+                contentView.image = image
+            }
+        })
     }
 }
