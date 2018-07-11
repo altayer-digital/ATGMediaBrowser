@@ -13,7 +13,7 @@
 
 public protocol MediaBrowserViewControllerDataSource: class {
 
-    typealias CompletionBlock = (Int, UIImage?) -> Void
+    typealias CompletionBlock = (Int, UIImage?, Error?) -> Void
 
     func numberOfItems(in mediaBrowser: MediaBrowserViewController) -> Int
     func mediaBrowser(_ mediaBrowser: MediaBrowserViewController, imageAt index: Int, completion: @escaping CompletionBlock)
@@ -353,11 +353,13 @@ extension MediaBrowserViewController {
 
         contentView.image = nil
         let convertedIndex = abs(contentView.index) % numMediaItems
-        dataSource?.mediaBrowser(self, imageAt: convertedIndex, completion: { (index, image) in
+        contentView.isLoading = true
+        dataSource?.mediaBrowser(self, imageAt: convertedIndex, completion: { (index, image, _) in
 
             if convertedIndex == index && image != nil {
                 contentView.image = image
             }
+            contentView.isLoading = false
         })
     }
 }
