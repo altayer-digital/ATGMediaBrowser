@@ -43,6 +43,8 @@ public class MediaBrowserViewController: UIViewController {
     public weak var dataSource: MediaBrowserViewControllerDataSource?
     public weak var delegate: MediaBrowserViewControllerDelegate?
 
+    private(set) var index: Int = 0
+
     private enum Constants {
 
         static let gapBetweenContents: CGFloat = 50.0
@@ -87,7 +89,15 @@ public class MediaBrowserViewController: UIViewController {
     }
 
     // MARK: - Initializers
-    public init() {
+    public init(
+        index: Int,
+        dataSource: MediaBrowserViewControllerDataSource,
+        delegate: MediaBrowserViewControllerDelegate? = nil
+        ) {
+
+        self.index = index
+        self.dataSource = dataSource
+        self.delegate = delegate
 
         super.init(nibName: nil, bundle: nil)
     }
@@ -128,7 +138,11 @@ public class MediaBrowserViewController: UIViewController {
         contentViews.removeAll()
 
         for i in -1...1 {
-            let mediaView = MediaContentView(index: i, frame: view.frame)
+            let mediaView = MediaContentView(
+                index: i + index,
+                position: CGFloat(i),
+                frame: view.frame
+            )
             view.addSubview(mediaView)
             mediaView.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
@@ -142,7 +156,6 @@ public class MediaBrowserViewController: UIViewController {
 
             updateContents(of: mediaView)
         }
-        view.bringSubview(toFront: contentViews[1])
     }
 
     // TODO: - Remove: Temporary Shit
@@ -302,6 +315,7 @@ extension MediaBrowserViewController {
 
         if middleView.position < -(normalizedGap + normalizedCenter) {
 
+            index += 1
             // Previous item is taken and placed on right/down most side
             previousView.position += CGFloat(viewCount)
             previousView.index += viewCount
@@ -310,10 +324,11 @@ extension MediaBrowserViewController {
             contentViews.removeFirst()
             contentViews.append(previousView)
 
-            delegate?.mediaBrowser(self, didChangeFocusTo: contentViews[1].index)
+            delegate?.mediaBrowser(self, didChangeFocusTo: index)
 
         } else if middleView.position > (1 + normalizedGap - normalizedCenter) {
 
+            index -= 1
             // Next item is taken and placed on left/top most side
             nextView.position -= CGFloat(viewCount)
             nextView.index -= viewCount
@@ -322,7 +337,7 @@ extension MediaBrowserViewController {
             contentViews.removeLast()
             contentViews.insert(nextView, at: 0)
 
-            delegate?.mediaBrowser(self, didChangeFocusTo: contentViews[1].index)
+            delegate?.mediaBrowser(self, didChangeFocusTo: index)
         }
     }
 

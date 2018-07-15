@@ -95,10 +95,10 @@ internal class MediaContentView: UIScrollView {
         return gesture
     }()
 
-    init(index itemIndex: Int, frame: CGRect) {
+    init(index itemIndex: Int, position: CGFloat, frame: CGRect) {
 
         self.index = itemIndex
-        self.position = CGFloat(itemIndex)
+        self.position = position
 
         super.init(frame: frame)
 
@@ -112,8 +112,6 @@ internal class MediaContentView: UIScrollView {
 
     private func initializeViewComponents() {
 
-        backgroundColor = [UIColor.purple, UIColor.green, UIColor.magenta][index + 1]
-
         addSubview(imageView)
         imageView.frame = frame
 
@@ -122,6 +120,8 @@ internal class MediaContentView: UIScrollView {
         configureScrollView()
 
         addGestureRecognizer(doubleTapGestureRecognizer)
+
+        updateTransform()
     }
 
     private func configureScrollView() {
