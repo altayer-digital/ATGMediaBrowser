@@ -224,6 +224,15 @@ extension MediaBrowserViewController {
         )
     }
 
+    override public func viewWillDisappear(_ animated: Bool) {
+
+        super.viewWillDisappear(animated)
+
+        if !controlToggleTask.isCancelled {
+            controlToggleTask.cancel()
+        }
+    }
+
     private func populateContentViews() {
 
         MediaContentView.interItemSpacing = gapBetweenMediaViews
