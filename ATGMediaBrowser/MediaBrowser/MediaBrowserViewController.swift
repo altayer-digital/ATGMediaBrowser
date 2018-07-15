@@ -44,10 +44,14 @@ public class MediaBrowserViewController: UIViewController {
             contentViews.forEach({ $0.updateTransform() })
         }
     }
-
-    public var browserStyle: BrowserStyle = .linear
+    public var browserStyle: BrowserStyle = .carousel
     public weak var dataSource: MediaBrowserViewControllerDataSource?
     public weak var delegate: MediaBrowserViewControllerDelegate?
+    public var hideControls: Bool = false {
+        didSet {
+            hideControlViews(hideControls)
+        }
+    }
 
     private(set) var index: Int = 0 {
         didSet {
@@ -63,6 +67,7 @@ public class MediaBrowserViewController: UIViewController {
         static let animationDuration = 0.3
         static let updateFrameRate: CGFloat = 60.0
         static let bounceFactor: CGFloat = 0.1
+        static let controlHideDelay = 3.0
 
         enum Close {
 
@@ -97,6 +102,23 @@ public class MediaBrowserViewController: UIViewController {
     }
 
     private var contentViews: [MediaContentView] = []
+
+    private var controlViews: [UIView] = []
+    lazy private var controlToggleTask: DispatchWorkItem = { [unowned self] in
+
+        let item = DispatchWorkItem {
+            self.hideControls = true
+        }
+        return item
+    }()
+    lazy private var tapGestureRecognizer: UITapGestureRecognizer = { [unowned self] in
+        let gesture = UITapGestureRecognizer()
+        gesture.numberOfTapsRequired = 1
+        gesture.numberOfTouchesRequired = 1
+        gesture.delegate = self
+        gesture.addTarget(self, action: #selector(tapGestureEvent(_:)))
+        return gesture
+    }()
 
     private var previousTranslation: CGPoint = .zero
 
@@ -169,6 +191,7 @@ public class MediaBrowserViewController: UIViewController {
         addPageControl()
 
         view.addGestureRecognizer(panGestureRecognizer)
+        view.addGestureRecognizer(tapGestureRecognizer)
     }
 
     override public func viewDidAppear(_ animated: Bool) {
@@ -176,6 +199,11 @@ public class MediaBrowserViewController: UIViewController {
         super.viewDidAppear(animated)
 
         contentViews.forEach({ $0.updateTransform() })
+
+        DispatchQueue.main.asyncAfter(
+            deadline: .now() + Constants.controlHideDelay,
+            execute: controlToggleTask
+        )
     }
 
     private func populateContentViews() {
@@ -229,6 +257,7 @@ public class MediaBrowserViewController: UIViewController {
                 closeButton.heightAnchor.constraint(equalToConstant: Constants.Close.height)
             ])
         }
+        controlViews.append(closeButton)
     }
 
     private func addPageControl() {
@@ -243,6 +272,21 @@ public class MediaBrowserViewController: UIViewController {
             pageControl.bottomAnchor.constraint(equalTo: bottomAnchor, constant: Constants.PageControl.bottom),
             pageControl.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
+
+        controlViews.append(pageControl)
+    }
+
+    private func hideControlViews(_ hide: Bool) {
+
+        UIView.animate(
+            withDuration: Constants.animationDuration,
+            delay: 0.0,
+            options: .beginFromCurrentState,
+            animations: {
+                self.controlViews.forEach { $0.alpha = hide ? 0.0 : 1.0 }
+            },
+            completion: nil
+        )
     }
 
     @objc private func didTapOnClose(_ sender: UIButton) {
@@ -251,7 +295,7 @@ public class MediaBrowserViewController: UIViewController {
     }
 }
 
-// MARK: - Pan Gesture Recognizer
+// MARK: - Gesture Recognizers
 
 extension MediaBrowserViewController {
 
@@ -319,6 +363,14 @@ extension MediaBrowserViewController {
         }
 
         previousTranslation = translation
+    }
+
+    @objc private func tapGestureEvent(_ recognizer: UITapGestureRecognizer) {
+
+        if !controlToggleTask.isCancelled {
+            controlToggleTask.cancel()
+        }
+        hideControls = !hideControls
     }
 }
 
@@ -479,8 +531,17 @@ extension MediaBrowserViewController: UIGestureRecognizerDelegate {
         shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer
         ) -> Bool {
 
-        if let scrollView = otherGestureRecognizer.view as? MediaContentView {
+        if gestureRecognizer is UIPanGestureRecognizer,
+            let scrollView = otherGestureRecognizer.view as? MediaContentView {
             return scrollView.zoomScale == 1.0
+        }
+        return false
+    }
+
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+
+        if gestureRecognizer is UITapGestureRecognizer {
+            return otherGestureRecognizer.view is MediaContentView
         }
         return false
     }
