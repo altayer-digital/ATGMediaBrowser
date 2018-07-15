@@ -24,28 +24,21 @@ public struct ZoomScale {
 
 internal class MediaContentView: UIScrollView {
 
-    private enum Constants {
-
-        static let indicatorViewSize: CGFloat = 60.0
-    }
-
+    // MARK: - Exposed variables
     internal static var interItemSpacing: CGFloat = 0.0
-
     internal var index: Int
+    internal static var contentTransformer: ContentTransformer = DefaultContentTransformers.horizontalMoveInOut
+
     internal var position: CGFloat {
         didSet {
             updateTransform()
         }
     }
-
-    internal static var contentTransformer: ContentTransformer = DefaultContentTransformers.horizontalMoveInOut
-
     internal var image: UIImage? {
         didSet {
             updateImageView()
         }
     }
-
     internal var isLoading: Bool = false {
         didSet {
             indicatorContainer.isHidden = !isLoading
@@ -56,7 +49,6 @@ internal class MediaContentView: UIScrollView {
             }
         }
     }
-
     internal var zoomLevels: ZoomScale? {
         didSet {
             zoomScale = ZoomScale.default.minimumZoomScale
@@ -64,6 +56,15 @@ internal class MediaContentView: UIScrollView {
             maximumZoomScale = zoomLevels?.maximumZoomScale ?? ZoomScale.default.maximumZoomScale
         }
     }
+
+    // MARK: - Private enumerations
+
+    private enum Constants {
+
+        static let indicatorViewSize: CGFloat = 60.0
+    }
+
+    // MARK: - Private variables
 
     private lazy var imageView: UIImageView = {
         let imageView = UIImageView()
@@ -109,6 +110,11 @@ internal class MediaContentView: UIScrollView {
 
         fatalError("Do nto use `init?(coder:)`")
     }
+}
+
+// MARK: - View Composition and Events
+
+extension MediaContentView {
 
     private func initializeViewComponents() {
 

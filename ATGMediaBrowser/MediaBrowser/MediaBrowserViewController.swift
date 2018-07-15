@@ -11,6 +11,8 @@
 //  Any reproduction of this material must contain this notice.
 //
 
+// MARK: - MediaBrowserViewControllerDataSource protocol
+
 public protocol MediaBrowserViewControllerDataSource: class {
 
     typealias CompletionBlock = (Int, UIImage?, ZoomScale?, Error?) -> Void
@@ -25,6 +27,8 @@ extension MediaBrowserViewControllerDataSource {
     func mediaBrowser(_ mediaBrowser: MediaBrowserViewController, updateCloseButton button: UIButton) {}
 }
 
+// MARK: - MediaBrowserViewControllerDelegate protocol
+
 public protocol MediaBrowserViewControllerDelegate: class {
 
     func mediaBrowser(_ mediaBrowser: MediaBrowserViewController, didChangeFocusTo index: Int)
@@ -37,6 +41,25 @@ extension MediaBrowserViewControllerDelegate {
 
 public class MediaBrowserViewController: UIViewController {
 
+    // MARK: - Exposed Enumerations
+
+    public enum GestureDirection {
+
+        case horizontal
+        case vertical
+    }
+
+    public enum BrowserStyle {
+
+        case linear
+        case carousel
+    }
+
+    // MARK: - Exposed variables
+
+    public weak var dataSource: MediaBrowserViewControllerDataSource?
+    public weak var delegate: MediaBrowserViewControllerDelegate?
+
     public var gestureDirection: GestureDirection = .horizontal
     public var gapBetweenMediaViews: CGFloat = Constants.gapBetweenContents {
         didSet {
@@ -45,19 +68,13 @@ public class MediaBrowserViewController: UIViewController {
         }
     }
     public var browserStyle: BrowserStyle = .carousel
-    public weak var dataSource: MediaBrowserViewControllerDataSource?
-    public weak var delegate: MediaBrowserViewControllerDelegate?
     public var hideControls: Bool = false {
         didSet {
             hideControlViews(hideControls)
         }
     }
 
-    private(set) var index: Int = 0 {
-        didSet {
-            pageControl.currentPage = index
-        }
-    }
+    // MARK: - Private Enumerations
 
     private enum Constants {
 
@@ -89,16 +106,11 @@ public class MediaBrowserViewController: UIViewController {
         }
     }
 
-    public enum GestureDirection {
-
-        case horizontal
-        case vertical
-    }
-
-    public enum BrowserStyle {
-
-        case linear
-        case carousel
+    // MARK: - Private variables
+    private(set) var index: Int = 0 {
+        didSet {
+            pageControl.currentPage = index
+        }
     }
 
     private var contentViews: [MediaContentView] = []
@@ -160,6 +172,7 @@ public class MediaBrowserViewController: UIViewController {
     }
 
     // MARK: - Initializers
+
     public init(
         index: Int,
         dataSource: MediaBrowserViewControllerDataSource,
@@ -177,6 +190,11 @@ public class MediaBrowserViewController: UIViewController {
 
         super.init(coder: aDecoder)
     }
+}
+
+// MARK: - View Lifecycle and Events
+
+extension MediaBrowserViewController {
 
     override public func viewDidLoad() {
 
