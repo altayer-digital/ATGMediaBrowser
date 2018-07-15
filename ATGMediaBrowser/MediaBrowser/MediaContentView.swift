@@ -11,6 +11,17 @@
 //  Any reproduction of this material must contain this notice.
 //
 
+public struct ZoomScale {
+
+    public var minimumZoomScale: CGFloat
+    public var maximumZoomScale: CGFloat
+
+    public static let `default` = ZoomScale(
+        minimumZoomScale: 1.0,
+        maximumZoomScale: 3.0
+    )
+}
+
 internal class MediaContentView: UIScrollView {
 
     private enum Constants {
@@ -31,7 +42,7 @@ internal class MediaContentView: UIScrollView {
 
     internal var image: UIImage? {
         didSet {
-            imageView.image = image
+            updateImageView()
         }
     }
 
@@ -46,8 +57,17 @@ internal class MediaContentView: UIScrollView {
         }
     }
 
+    internal var zoomLevels: ZoomScale? {
+        didSet {
+            zoomScale = ZoomScale.default.minimumZoomScale
+            minimumZoomScale = zoomLevels?.minimumZoomScale ?? ZoomScale.default.minimumZoomScale
+            maximumZoomScale = zoomLevels?.maximumZoomScale ?? ZoomScale.default.maximumZoomScale
+        }
+    }
+
     private lazy var imageView: UIImageView = {
         let imageView = UIImageView()
+        imageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         imageView.contentMode = .scaleAspectFit
         imageView.clipsToBounds = true
         return imageView
@@ -68,12 +88,12 @@ internal class MediaContentView: UIScrollView {
         return container
     }()
 
-    init(index itemIndex: Int) {
+    init(index itemIndex: Int, frame: CGRect) {
 
         self.index = itemIndex
         self.position = CGFloat(itemIndex)
 
-        super.init(frame: .zero)
+        super.init(frame: frame)
 
         initializeViewComponents()
     }
@@ -91,6 +111,19 @@ internal class MediaContentView: UIScrollView {
         imageView.frame = frame
 
         setupIndicatorView()
+
+        configureScrollView()
+    }
+
+    private func configureScrollView() {
+
+        delegate = self
+        isMultipleTouchEnabled = true
+        zoomLevels = ZoomScale.default
+        showsHorizontalScrollIndicator = false
+        showsVerticalScrollIndicator = false
+        contentSize = imageView.frame.size
+        canCancelContentTouches = false
     }
 
     private func setupIndicatorView() {
@@ -122,5 +155,60 @@ internal class MediaContentView: UIScrollView {
     internal func updateTransform() {
 
         MediaContentView.contentTransformer(self, position)
+    }
+}
+
+// MARK: - UIScrollViewDelegate
+
+extension MediaContentView: UIScrollViewDelegate {
+
+    func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+
+        return image != nil ? imageView : nil
+    }
+
+    func scrollViewDidZoom(_ scrollView: UIScrollView) {
+
+        centerImageView()
+    }
+
+    func centerImageView() {
+
+        var imageViewFrame = imageView.frame
+
+        if imageViewFrame.size.width < frame.size.width {
+            imageViewFrame.origin.x = (frame.size.width - imageViewFrame.size.width) / 2.0
+        } else {
+            imageViewFrame.origin.x = 0.0
+        }
+
+        if imageViewFrame.size.height < frame.size.height {
+            imageViewFrame.origin.y = (frame.size.height - imageViewFrame.size.height) / 2.0
+        } else {
+            imageViewFrame.origin.y = 0.0
+        }
+
+        imageView.frame = imageViewFrame
+    }
+
+    private func updateImageView() {
+
+        imageView.image = image
+
+        if let contentImage = image {
+
+            let imageViewSize = imageView.frame.size
+            let imageSize = contentImage.size
+            var targetImageSize = imageViewSize
+
+            if imageSize.width / imageSize.height > imageViewSize.width / imageViewSize.height {
+                targetImageSize.height = imageViewSize.width / imageSize.width * imageSize.height
+            } else {
+                targetImageSize.width = imageViewSize.height / imageSize.height * imageSize.width
+            }
+
+            imageView.frame = CGRect(origin: .zero, size: targetImageSize)
+        }
+        centerImageView()
     }
 }

@@ -13,7 +13,7 @@
 
 public protocol MediaBrowserViewControllerDataSource: class {
 
-    typealias CompletionBlock = (Int, UIImage?, Error?) -> Void
+    typealias CompletionBlock = (Int, UIImage?, ZoomScale?, Error?) -> Void
 
     func numberOfItems(in mediaBrowser: MediaBrowserViewController) -> Int
     func mediaBrowser(_ mediaBrowser: MediaBrowserViewController, imageAt index: Int, completion: @escaping CompletionBlock)
@@ -77,6 +77,7 @@ public class MediaBrowserViewController: UIViewController {
         let gesture = UIPanGestureRecognizer()
         gesture.minimumNumberOfTouches = 1
         gesture.maximumNumberOfTouches = 1
+        gesture.delegate = self
         gesture.addTarget(self, action: #selector(panGestureEvent(_:)))
         return gesture
     }()
@@ -127,7 +128,7 @@ public class MediaBrowserViewController: UIViewController {
         contentViews.removeAll()
 
         for i in -1...1 {
-            let mediaView = MediaContentView(index: i)
+            let mediaView = MediaContentView(index: i, frame: view.frame)
             view.addSubview(mediaView)
             mediaView.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
@@ -354,12 +355,29 @@ extension MediaBrowserViewController {
         contentView.image = nil
         let convertedIndex = abs(contentView.index) % numMediaItems
         contentView.isLoading = true
-        dataSource?.mediaBrowser(self, imageAt: convertedIndex, completion: { (index, image, _) in
+        dataSource?.mediaBrowser(self, imageAt: convertedIndex, completion: { (index, image, zoom, _) in
 
             if convertedIndex == index && image != nil {
                 contentView.image = image
+                contentView.zoomLevels = zoom
             }
             contentView.isLoading = false
         })
+    }
+}
+
+// MARK: - UIGestureRecognizerDelegate
+
+extension MediaBrowserViewController: UIGestureRecognizerDelegate {
+
+    public func gestureRecognizer(
+        _ gestureRecognizer: UIGestureRecognizer,
+        shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer
+        ) -> Bool {
+
+        if let scrollView = otherGestureRecognizer.view as? MediaContentView {
+            return scrollView.zoomScale == 1.0
+        }
+        return false
     }
 }
