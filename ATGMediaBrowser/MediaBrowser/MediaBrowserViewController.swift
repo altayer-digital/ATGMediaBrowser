@@ -17,6 +17,13 @@ public protocol MediaBrowserViewControllerDataSource: class {
 
     func numberOfItems(in mediaBrowser: MediaBrowserViewController) -> Int
     func mediaBrowser(_ mediaBrowser: MediaBrowserViewController, imageAt index: Int, completion: @escaping CompletionBlock)
+
+    func mediaBrowser(_ mediaBrowser: MediaBrowserViewController, updateCloseButton button: UIButton)
+}
+
+extension MediaBrowserViewControllerDataSource {
+
+    func mediaBrowser(_ mediaBrowser: MediaBrowserViewController, updateCloseButton button: UIButton) {}
 }
 
 public protocol MediaBrowserViewControllerDelegate: class {
@@ -53,6 +60,18 @@ public class MediaBrowserViewController: UIViewController {
         static let animationDuration = 0.3
         static let updateFrameRate: CGFloat = 60.0
         static let bounceFactor: CGFloat = 0.1
+
+        enum Close {
+
+            static let top: CGFloat = 8.0
+            static let trailing: CGFloat = -8.0
+            static let height: CGFloat = 30.0
+            static let minWidth: CGFloat = 30.0
+            static let contentInsets = UIEdgeInsets(top: 0.0, left: 8.0, bottom: 0.0, right: 8.0)
+            static let borderWidth: CGFloat = 2.0
+            static let borderColor: UIColor = .white
+            static let title = "Close"
+        }
     }
 
     public enum GestureDirection {
@@ -75,13 +94,24 @@ public class MediaBrowserViewController: UIViewController {
     private var distanceToMove: CGFloat = 0.0
 
     lazy private var panGestureRecognizer: UIPanGestureRecognizer = { [unowned self] in
-
         let gesture = UIPanGestureRecognizer()
         gesture.minimumNumberOfTouches = 1
         gesture.maximumNumberOfTouches = 1
         gesture.delegate = self
         gesture.addTarget(self, action: #selector(panGestureEvent(_:)))
         return gesture
+    }()
+
+    lazy private var closeButton: UIButton = { [unowned self] in
+
+        let button = UIButton()
+        button.setTitle(Constants.Close.title, for: .normal)
+        button.contentEdgeInsets = Constants.Close.contentInsets
+        button.addTarget(self, action: #selector(didTapOnClose(_:)), for: .touchUpInside)
+        button.layer.cornerRadius = Constants.Close.height * 0.5
+        button.layer.borderColor = Constants.Close.borderColor.cgColor
+        button.layer.borderWidth = Constants.Close.borderWidth
+        return button
     }()
 
     private var numMediaItems: Int {
@@ -107,18 +137,16 @@ public class MediaBrowserViewController: UIViewController {
         super.init(coder: aDecoder)
     }
 
-    private func initialize() {
-
-        view.backgroundColor = .red
-    }
-
     override public func viewDidLoad() {
 
         super.viewDidLoad()
 
+        view.backgroundColor = .black
+
         populateContentViews()
 
-        view.addGestureRecognizer(temporaryCloseGestureRecognizer)
+        addCloseButton()
+
         view.addGestureRecognizer(panGestureRecognizer)
     }
 
@@ -158,16 +186,31 @@ public class MediaBrowserViewController: UIViewController {
         }
     }
 
-    // TODO: - Remove: Temporary Shit
-    lazy private var temporaryCloseGestureRecognizer: UITapGestureRecognizer = { [unowned self] in
+    private func addCloseButton() {
 
-        let gesture = UITapGestureRecognizer()
-        gesture.numberOfTapsRequired = 3
-        gesture.addTarget(self, action: #selector(temporaryCloseMethod))
-        return gesture
-    }()
+        view.addSubview(closeButton)
+        dataSource?.mediaBrowser(self, updateCloseButton: closeButton)
 
-    @objc private func temporaryCloseMethod() {
+        if closeButton.constraints.isEmpty {
+            closeButton.translatesAutoresizingMaskIntoConstraints = false
+            var topAnchor = view.topAnchor
+            if #available(iOS 11.0, *) {
+                topAnchor = view.safeAreaLayoutGuide.topAnchor
+            }
+
+            NSLayoutConstraint.activate([
+                closeButton.topAnchor.constraint(equalTo: topAnchor, constant: Constants.Close.top),
+                closeButton.trailingAnchor.constraint(
+                    equalTo: view.trailingAnchor,
+                    constant: Constants.Close.trailing
+                ),
+                closeButton.widthAnchor.constraint(greaterThanOrEqualToConstant: Constants.Close.minWidth),
+                closeButton.heightAnchor.constraint(equalToConstant: Constants.Close.height)
+            ])
+        }
+    }
+
+    @objc private func didTapOnClose(_ sender: UIButton) {
 
         dismiss(animated: true, completion: nil)
     }
