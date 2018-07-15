@@ -88,6 +88,13 @@ internal class MediaContentView: UIScrollView {
         return container
     }()
 
+    private lazy var doubleTapGestureRecognizer: UITapGestureRecognizer = { [unowned self] in
+        let gesture = UITapGestureRecognizer(target: self, action: #selector(didDoubleTap(_:)))
+        gesture.numberOfTapsRequired = 2
+        gesture.numberOfTouchesRequired = 1
+        return gesture
+    }()
+
     init(index itemIndex: Int, frame: CGRect) {
 
         self.index = itemIndex
@@ -113,17 +120,19 @@ internal class MediaContentView: UIScrollView {
         setupIndicatorView()
 
         configureScrollView()
+
+        addGestureRecognizer(doubleTapGestureRecognizer)
     }
 
     private func configureScrollView() {
 
-        delegate = self
         isMultipleTouchEnabled = true
-        zoomLevels = ZoomScale.default
         showsHorizontalScrollIndicator = false
         showsVerticalScrollIndicator = false
         contentSize = imageView.frame.size
         canCancelContentTouches = false
+        zoomLevels = ZoomScale.default
+        delegate = self
     }
 
     private func setupIndicatorView() {
@@ -155,6 +164,27 @@ internal class MediaContentView: UIScrollView {
     internal func updateTransform() {
 
         MediaContentView.contentTransformer(self, position)
+    }
+
+    @objc private func didDoubleTap(_ recognizer: UITapGestureRecognizer) {
+
+        let locationInImage = recognizer.location(in: imageView)
+
+        let isImageCoveringScreen = imageView.frame.size.width > frame.size.width &&
+            imageView.frame.size.height > frame.size.height
+        let zoomTo = isImageCoveringScreen ? minimumZoomScale : maximumZoomScale
+
+        let width = frame.size.width / zoomTo
+        let height = frame.size.height / zoomTo
+
+        let zoomRect = CGRect(
+            x: locationInImage.x - width * 0.5,
+            y: locationInImage.y - height * 0.5,
+            width: width,
+            height: height
+        )
+
+        zoom(to: zoomRect, animated: true)
     }
 }
 
