@@ -17,7 +17,6 @@ public protocol MediaBrowserViewControllerDataSource: class {
 
     func numberOfItems(in mediaBrowser: MediaBrowserViewController) -> Int
     func mediaBrowser(_ mediaBrowser: MediaBrowserViewController, imageAt index: Int, completion: @escaping CompletionBlock)
-
     func mediaBrowser(_ mediaBrowser: MediaBrowserViewController, updateCloseButton button: UIButton)
 }
 
@@ -50,7 +49,11 @@ public class MediaBrowserViewController: UIViewController {
     public weak var dataSource: MediaBrowserViewControllerDataSource?
     public weak var delegate: MediaBrowserViewControllerDelegate?
 
-    private(set) var index: Int = 0
+    private(set) var index: Int = 0 {
+        didSet {
+            pageControl.currentPage = index
+        }
+    }
 
     private enum Constants {
 
@@ -71,6 +74,13 @@ public class MediaBrowserViewController: UIViewController {
             static let borderWidth: CGFloat = 2.0
             static let borderColor: UIColor = .white
             static let title = "Close"
+        }
+
+        enum PageControl {
+
+            static let bottom: CGFloat = -10.0
+            static let tintColor: UIColor = .lightGray
+            static let selectedTintColor: UIColor = .white
         }
     }
 
@@ -103,7 +113,6 @@ public class MediaBrowserViewController: UIViewController {
     }()
 
     lazy private var closeButton: UIButton = { [unowned self] in
-
         let button = UIButton()
         button.setTitle(Constants.Close.title, for: .normal)
         button.contentEdgeInsets = Constants.Close.contentInsets
@@ -112,6 +121,16 @@ public class MediaBrowserViewController: UIViewController {
         button.layer.borderColor = Constants.Close.borderColor.cgColor
         button.layer.borderWidth = Constants.Close.borderWidth
         return button
+    }()
+
+    lazy private var pageControl: UIPageControl = { [unowned self] in
+        let pageControl = UIPageControl()
+        pageControl.hidesForSinglePage = true
+        pageControl.numberOfPages = numMediaItems
+        pageControl.currentPageIndicatorTintColor = Constants.PageControl.selectedTintColor
+        pageControl.tintColor = Constants.PageControl.tintColor
+        pageControl.currentPage = index
+        return pageControl
     }()
 
     private var numMediaItems: Int {
@@ -146,6 +165,8 @@ public class MediaBrowserViewController: UIViewController {
         populateContentViews()
 
         addCloseButton()
+
+        addPageControl()
 
         view.addGestureRecognizer(panGestureRecognizer)
     }
@@ -208,6 +229,20 @@ public class MediaBrowserViewController: UIViewController {
                 closeButton.heightAnchor.constraint(equalToConstant: Constants.Close.height)
             ])
         }
+    }
+
+    private func addPageControl() {
+
+        view.addSubview(pageControl)
+        pageControl.translatesAutoresizingMaskIntoConstraints = false
+        var bottomAnchor = view.bottomAnchor
+        if #available(iOS 11.0, *) {
+            bottomAnchor = view.safeAreaLayoutGuide.bottomAnchor
+        }
+        NSLayoutConstraint.activate([
+            pageControl.bottomAnchor.constraint(equalTo: bottomAnchor, constant: Constants.PageControl.bottom),
+            pageControl.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+        ])
     }
 
     @objc private func didTapOnClose(_ sender: UIButton) {
@@ -358,7 +393,8 @@ extension MediaBrowserViewController {
 
         if middleView.position < -(normalizedGap + normalizedCenter) {
 
-            index += 1
+            index = sanitizeIndex(index + 1)
+
             // Previous item is taken and placed on right/down most side
             previousView.position += CGFloat(viewCount)
             previousView.index += viewCount
@@ -371,7 +407,8 @@ extension MediaBrowserViewController {
 
         } else if middleView.position > (1 + normalizedGap - normalizedCenter) {
 
-            index -= 1
+            index = sanitizeIndex(index - 1)
+
             // Next item is taken and placed on left/top most side
             nextView.position -= CGFloat(viewCount)
             nextView.index -= viewCount
@@ -411,7 +448,7 @@ extension MediaBrowserViewController {
     private func updateContents(of contentView: MediaContentView) {
 
         contentView.image = nil
-        let convertedIndex = abs(contentView.index) % numMediaItems
+        let convertedIndex = sanitizeIndex(contentView.index)
         contentView.isLoading = true
         dataSource?.mediaBrowser(self, imageAt: convertedIndex, completion: { (index, image, zoom, _) in
 
@@ -421,6 +458,15 @@ extension MediaBrowserViewController {
             }
             contentView.isLoading = false
         })
+    }
+
+    private func sanitizeIndex(_ index: Int) -> Int {
+
+        let newIndex = index % numMediaItems
+        if newIndex < 0 {
+            return newIndex + numMediaItems
+        }
+        return newIndex
     }
 }
 
