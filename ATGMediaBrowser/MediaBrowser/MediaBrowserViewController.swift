@@ -55,19 +55,34 @@ public class MediaBrowserViewController: UIViewController {
         case carousel
     }
 
+    public enum ContentDrawOrder {
+
+        case previousToNext
+        case nextToPrevious
+    }
+
     // MARK: - Exposed variables
 
     public weak var dataSource: MediaBrowserViewControllerDataSource?
     public weak var delegate: MediaBrowserViewControllerDelegate?
 
     public var gestureDirection: GestureDirection = .horizontal
+    public var contentTransformer: ContentTransformer = DefaultContentTransformers.horizontalMoveInOut {
+        didSet {
+
+            MediaContentView.contentTransformer = contentTransformer
+            contentViews.forEach({ $0.updateTransform() })
+        }
+    }
+    public var drawOrder: ContentDrawOrder = .previousToNext
+
+    public var browserStyle: BrowserStyle = .carousel
     public var gapBetweenMediaViews: CGFloat = Constants.gapBetweenContents {
         didSet {
             MediaContentView.interItemSpacing = gapBetweenMediaViews
             contentViews.forEach({ $0.updateTransform() })
         }
     }
-    public var browserStyle: BrowserStyle = .carousel
     public var hideControls: Bool = false {
         didSet {
             hideControlViews(hideControls)
@@ -300,7 +315,7 @@ extension MediaBrowserViewController {
         ])
 
         MediaContentView.interItemSpacing = gapBetweenMediaViews
-        MediaContentView.contentTransformer = DefaultContentTransformers.horizontalMoveInOut
+        MediaContentView.contentTransformer = contentTransformer
 
         contentViews.forEach({ $0.removeFromSuperview() })
         contentViews.removeAll()
@@ -323,6 +338,9 @@ extension MediaBrowserViewController {
             contentViews.append(mediaView)
 
             updateContents(of: mediaView)
+        }
+        if drawOrder == .nextToPrevious {
+            mediaContainerView.exchangeSubview(at: 0, withSubviewAt: 2)
         }
     }
 
@@ -550,7 +568,12 @@ extension MediaBrowserViewController {
             contentViews.removeFirst()
             contentViews.append(previousView)
 
-            mediaContainerView.bringSubview(toFront: previousView)
+            switch drawOrder {
+            case .previousToNext:
+                mediaContainerView.bringSubview(toFront: previousView)
+            case .nextToPrevious:
+                mediaContainerView.sendSubview(toBack: previousView)
+            }
 
             delegate?.mediaBrowser(self, didChangeFocusTo: index)
 
@@ -570,7 +593,12 @@ extension MediaBrowserViewController {
             contentViews.removeLast()
             contentViews.insert(nextView, at: 0)
 
-            mediaContainerView.sendSubview(toBack: nextView)
+            switch drawOrder {
+            case .previousToNext:
+                mediaContainerView.sendSubview(toBack: nextView)
+            case .nextToPrevious:
+                mediaContainerView.bringSubview(toFront: nextView)
+            }
 
             delegate?.mediaBrowser(self, didChangeFocusTo: index)
         }
