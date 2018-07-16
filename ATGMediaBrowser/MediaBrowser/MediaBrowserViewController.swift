@@ -167,6 +167,16 @@ public class MediaBrowserViewController: UIViewController {
         return pageControl
     }()
 
+    lazy private var visualEffectContentView: UIImageView = { [unowned self] in
+        return UIImageView(frame: view.frame)
+    }()
+    lazy private var blurEffect: UIBlurEffect = {
+        return UIBlurEffect(style: .dark)
+    }()
+    lazy private var visualEffectView: UIVisualEffectView = { [unowned self] in
+        return UIVisualEffectView(effect: blurEffect)
+    }()
+
     private var numMediaItems: Int {
         return dataSource?.numberOfItems(in: self) ?? 1
     }
@@ -202,6 +212,8 @@ extension MediaBrowserViewController {
 
         view.backgroundColor = .black
 
+        addVisualEffectView()
+
         populateContentViews()
 
         addCloseButton()
@@ -231,6 +243,27 @@ extension MediaBrowserViewController {
         if !controlToggleTask.isCancelled {
             controlToggleTask.cancel()
         }
+    }
+
+    private func addVisualEffectView() {
+
+        view.addSubview(visualEffectContentView)
+        visualEffectContentView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            visualEffectContentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            visualEffectContentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            visualEffectContentView.topAnchor.constraint(equalTo: view.topAnchor),
+            visualEffectContentView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+
+        view.addSubview(visualEffectView)
+        visualEffectView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            visualEffectView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            visualEffectView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            visualEffectView.topAnchor.constraint(equalTo: view.topAnchor),
+            visualEffectView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
     }
 
     private func populateContentViews() {
@@ -479,6 +512,10 @@ extension MediaBrowserViewController {
             previousView.index += viewCount
             updateContents(of: previousView)
 
+            if let image = nextView.image {
+                self.visualEffectContentView.image = image
+            }
+
             contentViews.removeFirst()
             contentViews.append(previousView)
 
@@ -492,6 +529,10 @@ extension MediaBrowserViewController {
             nextView.position -= CGFloat(viewCount)
             nextView.index -= viewCount
             updateContents(of: nextView)
+
+            if let image = previousView.image {
+                self.visualEffectContentView.image = image
+            }
 
             contentViews.removeLast()
             contentViews.insert(nextView, at: 0)
@@ -534,6 +575,10 @@ extension MediaBrowserViewController {
             if convertedIndex == index && image != nil {
                 contentView.image = image
                 contentView.zoomLevels = zoom
+
+                if index == self.index {
+                    self.visualEffectContentView.image = image
+                }
             }
             contentView.isLoading = false
         })
