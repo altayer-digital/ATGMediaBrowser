@@ -94,6 +94,18 @@ public class MediaBrowserViewController: UIViewController {
             hideControlViews(hideControls)
         }
     }
+    public var autoHideControls: Bool = false {
+        didSet {
+            if autoHideControls {
+                DispatchQueue.main.asyncAfter(
+                    deadline: .now() + Constants.controlHideDelay,
+                    execute: controlToggleTask
+                )
+            } else {
+                controlToggleTask.cancel()
+            }
+        }
+    }
 
     // MARK: - Private Enumerations
 
@@ -272,11 +284,6 @@ extension MediaBrowserViewController {
         super.viewDidAppear(animated)
 
         contentViews.forEach({ $0.updateTransform() })
-
-        DispatchQueue.main.asyncAfter(
-            deadline: .now() + Constants.controlHideDelay,
-            execute: controlToggleTask
-        )
     }
 
     override public func viewWillDisappear(_ animated: Bool) {
