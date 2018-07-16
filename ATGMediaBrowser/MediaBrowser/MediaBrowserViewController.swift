@@ -13,6 +13,11 @@
 
 public class MediaBrowserViewController: UIViewController {
 
+    private enum Constants {
+
+        static let gapBetweenContents: CGFloat = 50.0
+    }
+
     private var contentViews: [MediaContentView] = []
 
     // MARK: - Initializers
@@ -42,13 +47,22 @@ public class MediaBrowserViewController: UIViewController {
         view.addGestureRecognizer(temporaryCloseGestureRecognizer)
     }
 
+    override public func viewDidAppear(_ animated: Bool) {
+
+        super.viewDidAppear(animated)
+
+        contentViews.forEach({ $0.updateTransform() })
+    }
+
     private func populateContentViews() {
+
+        MediaContentView.interItemSpacing = Constants.gapBetweenContents
 
         contentViews.forEach({ $0.removeFromSuperview() })
         contentViews.removeAll()
 
-        for _ in 0..<3 {
-            let mediaView = MediaContentView()
+        for i in 0..<3 {
+            let mediaView = MediaContentView(index: i)
             view.addSubview(mediaView)
             mediaView.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([

@@ -13,23 +13,38 @@
 
 internal class MediaContentView: UIScrollView {
 
-    // TODO: Remove
-    private static var tempIndex = 0
+    internal static var interItemSpacing: CGFloat = 0.0
 
-    override init(frame: CGRect) {
+    internal var index: Int
+    internal var position: CGFloat {
+        didSet {
+            updateTransform()
+        }
+    }
 
-        super.init(frame: frame)
+    init(index itemIndex: Int) {
+
+        self.index = itemIndex
+        self.position = CGFloat(itemIndex - 1)
+
+        super.init(frame: .zero)
+
+        initialize()
     }
 
     required init?(coder aDecoder: NSCoder) {
 
-        super.init(coder: aDecoder)
-
+        fatalError("Do nto use `init?(coder:)`")
     }
 
     private func initialize() {
 
-        backgroundColor = [UIColor.purple, UIColor.green, UIColor.magenta][MediaContentView.tempIndex]
-        MediaContentView.tempIndex += 1
+        backgroundColor = [UIColor.purple, UIColor.green, UIColor.magenta][index]
+    }
+
+    internal func updateTransform() {
+
+        let widthIncludingGap = frame.size.width + MediaContentView.interItemSpacing
+        transform = CGAffineTransform.identity.translatedBy(x: position * widthIncludingGap, y: 0.0)
     }
 }
