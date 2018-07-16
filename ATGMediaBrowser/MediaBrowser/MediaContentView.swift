@@ -11,26 +11,30 @@
 //  Any reproduction of this material must contain this notice.
 //
 
-typealias ContentTransformer = (MediaContentView, CGPoint) -> Void
+typealias ContentTransformer = (MediaContentView, CGFloat) -> Void
 
 internal class MediaContentView: UIScrollView {
 
     static let horizontalMovement: ContentTransformer = { contentView, position in
 
         let widthIncludingGap = contentView.frame.size.width + MediaContentView.interItemSpacing
-        contentView.transform = CGAffineTransform(translationX: widthIncludingGap * position.x, y: 0.0)
+        contentView.transform = CGAffineTransform(translationX: widthIncludingGap * position, y: 0.0)
     }
 
     static let verticalMovement: ContentTransformer = { contentView, position in
 
         let heightIncludingGap = contentView.frame.size.height + MediaContentView.interItemSpacing
-        contentView.transform = CGAffineTransform(translationX: 0.0, y: heightIncludingGap * position.y)
+        contentView.transform = CGAffineTransform(translationX: 0.0, y: heightIncludingGap * position)
     }
 
     internal static var interItemSpacing: CGFloat = 0.0
 
-    internal var index: Int
-    internal var position: CGPoint {
+    internal var index: Int {
+        didSet {
+            updateContents()
+        }
+    }
+    internal var position: CGFloat {
         didSet {
             updateTransform()
         }
@@ -41,11 +45,7 @@ internal class MediaContentView: UIScrollView {
     init(index itemIndex: Int) {
 
         self.index = itemIndex
-
-        self.position = CGPoint(
-            x: itemIndex - 1,
-            y: itemIndex - 1
-        )
+        self.position = CGFloat(itemIndex - 1)
 
         super.init(frame: .zero)
 
@@ -65,5 +65,10 @@ internal class MediaContentView: UIScrollView {
     internal func updateTransform() {
 
         MediaContentView.transformer(self, position)
+    }
+
+    private func updateContents() {
+
+        // TODO: Update image/video contents here.
     }
 }

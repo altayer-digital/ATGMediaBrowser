@@ -13,9 +13,23 @@
 
 public class MediaBrowserViewController: UIViewController {
 
+    public var gestureDirection: GestureDirection = .horizontal
+    public var gapBetweenMediaViews: CGFloat = Constants.gapBetweenContents {
+        didSet {
+            MediaContentView.interItemSpacing = gapBetweenMediaViews
+            contentViews.forEach({ $0.updateTransform() })
+        }
+    }
+
     private enum Constants {
 
         static let gapBetweenContents: CGFloat = 50.0
+    }
+
+    public enum GestureDirection {
+
+        case horizontal
+        case vertical
     }
 
     private var contentViews: [MediaContentView] = []
@@ -68,7 +82,7 @@ public class MediaBrowserViewController: UIViewController {
 
     private func populateContentViews() {
 
-        MediaContentView.interItemSpacing = Constants.gapBetweenContents
+        MediaContentView.interItemSpacing = gapBetweenMediaViews
 
         contentViews.forEach({ $0.removeFromSuperview() })
         contentViews.removeAll()
@@ -142,13 +156,48 @@ extension MediaBrowserViewController {
 
         print("Translation registered : ", translation)
 
+        let viewSizeIncludingGap = CGSize(
+            width: view.frame.size.width + gapBetweenMediaViews,
+            height: view.frame.size.height + gapBetweenMediaViews
+        )
+
         let normalizedTranslation = CGPoint(
-            x: (translation.x)/(view.frame.size.width + Constants.gapBetweenContents),
-            y: (translation.y)/(view.frame.size.height + Constants.gapBetweenContents)
+            x: (translation.x)/viewSizeIncludingGap.width,
+            y: (translation.y)/viewSizeIncludingGap.height
         )
         contentViews.forEach({
-            $0.position.x += normalizedTranslation.x
-            $0.position.y += normalizedTranslation.y
+            $0.position += (gestureDirection == .horizontal ? normalizedTranslation.x : normalizedTranslation.y)
         })
+
+        var viewsCopy = contentViews
+        let leftView = viewsCopy.removeFirst()
+        let middleView = viewsCopy.removeFirst()
+        let rightView = viewsCopy.removeFirst()
+
+        let viewSize = (gestureDirection == .horizontal) ? viewSizeIncludingGap.width : viewSizeIncludingGap.height
+
+        let normalizedGap = gapBetweenMediaViews/viewSize
+        let normalizedCenter = (middleView.frame.size.width / viewSize) * 0.5
+
+        let viewCount = contentViews.count
+
+        if middleView.position < -(normalizedGap + normalizedCenter) {
+
+            // Left item is taken and placed on right most side
+            leftView.position += CGFloat(viewCount)
+            leftView.index += viewCount
+
+            contentViews.removeFirst()
+            contentViews.append(leftView)
+
+        } else if middleView.position > (1 + normalizedGap - normalizedCenter) {
+
+            // Right item is taken and placed on left most side
+            rightView.position -= CGFloat(viewCount)
+            rightView.index -= viewCount
+
+            contentViews.removeLast()
+            contentViews.insert(rightView, at: 0)
+        }
     }
 }
