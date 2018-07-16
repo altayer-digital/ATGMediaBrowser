@@ -200,7 +200,8 @@ extension MediaContentView: UIScrollViewDelegate {
 
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
 
-        return image != nil ? imageView : nil
+        let shouldAllowZoom = (image != nil && position == 0.0)
+        return shouldAllowZoom ? imageView : nil
     }
 
     func scrollViewDidZoom(_ scrollView: UIScrollView) {
