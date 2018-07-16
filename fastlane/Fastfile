@@ -1,0 +1,30 @@
+fastlane_version "2.63.0"
+
+default_platform :ios
+
+platform :ios do
+
+  lane :bootstrap do |options|
+    carthage_opts = {
+      :platform => "ios",
+      :cache_builds => true
+    }
+
+    if options[:derived_data]
+      carthage_opts[:derived_data] = options[:derived_data]
+    end
+
+    carthage(carthage_opts)
+  end
+
+  lane :debug_build do
+    skip_docs
+    xcodebuild(configuration: "Debug", clean: true, build: true)
+  end
+
+  lane :release_build do
+    skip_docs
+    xcodebuild(configuration: "Release", clean: true, build: true)
+  end
+
+end
