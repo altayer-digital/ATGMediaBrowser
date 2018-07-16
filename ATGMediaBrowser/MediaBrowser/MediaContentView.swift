@@ -198,18 +198,18 @@ extension MediaContentView {
 
 extension MediaContentView: UIScrollViewDelegate {
 
-    func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+    internal func viewForZooming(in scrollView: UIScrollView) -> UIView? {
 
         let shouldAllowZoom = (image != nil && position == 0.0)
         return shouldAllowZoom ? imageView : nil
     }
 
-    func scrollViewDidZoom(_ scrollView: UIScrollView) {
+    internal func scrollViewDidZoom(_ scrollView: UIScrollView) {
 
         centerImageView()
     }
 
-    func centerImageView() {
+    private func centerImageView() {
 
         var imageViewFrame = imageView.frame
 

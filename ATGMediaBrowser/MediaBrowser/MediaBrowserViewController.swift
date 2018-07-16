@@ -74,7 +74,13 @@ public class MediaBrowserViewController: UIViewController {
             contentViews.forEach({ $0.updateTransform() })
         }
     }
-    public var drawOrder: ContentDrawOrder = .previousToNext
+    public var drawOrder: ContentDrawOrder = .previousToNext {
+        didSet {
+            if oldValue != drawOrder {
+                mediaContainerView.exchangeSubview(at: 0, withSubviewAt: 2)
+            }
+        }
+    }
 
     public var browserStyle: BrowserStyle = .carousel
     public var gapBetweenMediaViews: CGFloat = Constants.gapBetweenContents {
@@ -673,7 +679,10 @@ extension MediaBrowserViewController: UIGestureRecognizerDelegate {
         return false
     }
 
-    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+    public func gestureRecognizer(
+        _ gestureRecognizer: UIGestureRecognizer,
+        shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer
+        ) -> Bool {
 
         if gestureRecognizer is UITapGestureRecognizer {
             return otherGestureRecognizer.view is MediaContentView
