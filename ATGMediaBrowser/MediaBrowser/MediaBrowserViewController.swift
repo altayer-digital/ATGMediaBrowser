@@ -194,11 +194,24 @@ public class MediaBrowserViewController: UIViewController {
         self.delegate = delegate
 
         super.init(nibName: nil, bundle: nil)
+
+        initialize()
     }
 
     public required init?(coder aDecoder: NSCoder) {
 
         super.init(coder: aDecoder)
+
+        initialize()
+    }
+
+    private func initialize() {
+
+        view.backgroundColor = .black
+
+        modalPresentationStyle = .custom
+
+        modalTransitionStyle = .crossDissolve
     }
 }
 
@@ -214,8 +227,6 @@ extension MediaBrowserViewController {
     override public func viewDidLoad() {
 
         super.viewDidLoad()
-
-        view.backgroundColor = .black
 
         addVisualEffectView()
 
