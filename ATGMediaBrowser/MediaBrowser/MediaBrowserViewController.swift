@@ -206,6 +206,11 @@ public class MediaBrowserViewController: UIViewController {
 
 extension MediaBrowserViewController {
 
+    override public var prefersStatusBarHidden: Bool {
+
+        return true
+    }
+
     override public func viewDidLoad() {
 
         super.viewDidLoad()
