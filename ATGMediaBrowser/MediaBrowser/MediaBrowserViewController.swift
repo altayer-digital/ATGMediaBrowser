@@ -20,6 +20,17 @@ public class MediaBrowserViewController: UIViewController {
 
     private var contentViews: [MediaContentView] = []
 
+    private var previousTranslation: CGPoint = .zero
+
+    lazy private var panGestureRecognizer: UIPanGestureRecognizer = { [unowned self] in
+
+        let gesture = UIPanGestureRecognizer()
+        gesture.minimumNumberOfTouches = 1
+        gesture.maximumNumberOfTouches = 1
+        gesture.addTarget(self, action: #selector(panGestureEvent(_:)))
+        return gesture
+    }()
+
     // MARK: - Initializers
     public init() {
 
@@ -45,6 +56,7 @@ public class MediaBrowserViewController: UIViewController {
         populateContentViews()
 
         view.addGestureRecognizer(temporaryCloseGestureRecognizer)
+        view.addGestureRecognizer(panGestureRecognizer)
     }
 
     override public func viewDidAppear(_ animated: Bool) {
@@ -77,7 +89,7 @@ public class MediaBrowserViewController: UIViewController {
     }
 
     // TODO: - Remove: Temporary Shit
-    lazy var temporaryCloseGestureRecognizer: UITapGestureRecognizer = { [unowned self] in
+    lazy private var temporaryCloseGestureRecognizer: UITapGestureRecognizer = { [unowned self] in
 
         let gesture = UITapGestureRecognizer()
         gesture.numberOfTapsRequired = 3
@@ -85,8 +97,58 @@ public class MediaBrowserViewController: UIViewController {
         return gesture
     }()
 
-    @objc func temporaryCloseMethod() {
+    @objc private func temporaryCloseMethod() {
 
         dismiss(animated: true, completion: nil)
+    }
+}
+
+// MARK: - Pan Gesture Recognizer
+
+extension MediaBrowserViewController {
+
+    @objc private func panGestureEvent(_ recognizer: UIPanGestureRecognizer) {
+
+        let translation = recognizer.translation(in: view)
+
+        switch recognizer.state {
+        case .began:
+            previousTranslation = translation // TODO: Revisit and decide if fallthrough is needed.
+        case .changed:
+            moveViews(by: CGPoint(x: translation.x - previousTranslation.x, y: translation.y - previousTranslation.y))
+        case .ended, .failed, .cancelled:
+            let velocity = recognizer.velocity(in: view)
+            print("Terminal velocity : ", velocity)
+
+            // TODO:
+            if velocity.x < 0.0 {
+
+            } else {
+
+            }
+        default:
+            break
+        }
+
+        previousTranslation = translation
+    }
+}
+
+// MARK: - Updating View Positions
+
+extension MediaBrowserViewController {
+
+    private func moveViews(by translation: CGPoint) {
+
+        print("Translation registered : ", translation)
+
+        let normalizedTranslation = CGPoint(
+            x: (translation.x)/(view.frame.size.width + Constants.gapBetweenContents),
+            y: (translation.y)/(view.frame.size.height + Constants.gapBetweenContents)
+        )
+        contentViews.forEach({
+            $0.position.x += normalizedTranslation.x
+            $0.position.y += normalizedTranslation.y
+        })
     }
 }

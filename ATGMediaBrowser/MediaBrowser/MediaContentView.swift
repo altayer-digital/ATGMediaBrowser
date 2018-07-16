@@ -11,21 +11,41 @@
 //  Any reproduction of this material must contain this notice.
 //
 
+typealias ContentTransformer = (MediaContentView, CGPoint) -> Void
+
 internal class MediaContentView: UIScrollView {
+
+    static let horizontalMovement: ContentTransformer = { contentView, position in
+
+        let widthIncludingGap = contentView.frame.size.width + MediaContentView.interItemSpacing
+        contentView.transform = CGAffineTransform(translationX: widthIncludingGap * position.x, y: 0.0)
+    }
+
+    static let verticalMovement: ContentTransformer = { contentView, position in
+
+        let heightIncludingGap = contentView.frame.size.height + MediaContentView.interItemSpacing
+        contentView.transform = CGAffineTransform(translationX: 0.0, y: heightIncludingGap * position.y)
+    }
 
     internal static var interItemSpacing: CGFloat = 0.0
 
     internal var index: Int
-    internal var position: CGFloat {
+    internal var position: CGPoint {
         didSet {
             updateTransform()
         }
     }
 
+    internal static var transformer: ContentTransformer = horizontalMovement
+
     init(index itemIndex: Int) {
 
         self.index = itemIndex
-        self.position = CGFloat(itemIndex - 1)
+
+        self.position = CGPoint(
+            x: itemIndex - 1,
+            y: itemIndex - 1
+        )
 
         super.init(frame: .zero)
 
@@ -44,7 +64,6 @@ internal class MediaContentView: UIScrollView {
 
     internal func updateTransform() {
 
-        let widthIncludingGap = frame.size.width + MediaContentView.interItemSpacing
-        transform = CGAffineTransform.identity.translatedBy(x: position * widthIncludingGap, y: 0.0)
+        MediaContentView.transformer(self, position)
     }
 }
