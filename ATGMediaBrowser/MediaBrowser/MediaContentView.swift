@@ -135,7 +135,7 @@ extension MediaContentView {
         isMultipleTouchEnabled = true
         showsHorizontalScrollIndicator = false
         showsVerticalScrollIndicator = false
-        contentSize = imageView.frame.size
+        contentSize = imageView.bounds.size
         canCancelContentTouches = false
         zoomLevels = ZoomScale.default
         delegate = self
@@ -176,12 +176,12 @@ extension MediaContentView {
 
         let locationInImage = recognizer.location(in: imageView)
 
-        let isImageCoveringScreen = imageView.frame.size.width > frame.size.width &&
-            imageView.frame.size.height > frame.size.height
+        let isImageCoveringScreen = imageView.frame.size.width > bounds.size.width &&
+            imageView.frame.size.height > bounds.size.height
         let zoomTo = isImageCoveringScreen ? minimumZoomScale : maximumZoomScale
 
-        let width = frame.size.width / zoomTo
-        let height = frame.size.height / zoomTo
+        let width = bounds.size.width / zoomTo
+        let height = bounds.size.height / zoomTo
 
         let zoomRect = CGRect(
             x: locationInImage.x - width * 0.5,
@@ -212,14 +212,14 @@ extension MediaContentView: UIScrollViewDelegate {
 
         var imageViewFrame = imageView.frame
 
-        if imageViewFrame.size.width < frame.size.width {
-            imageViewFrame.origin.x = (frame.size.width - imageViewFrame.size.width) / 2.0
+        if imageViewFrame.size.width < bounds.size.width {
+            imageViewFrame.origin.x = (bounds.size.width - imageViewFrame.size.width) / 2.0
         } else {
             imageViewFrame.origin.x = 0.0
         }
 
-        if imageViewFrame.size.height < frame.size.height {
-            imageViewFrame.origin.y = (frame.size.height - imageViewFrame.size.height) / 2.0
+        if imageViewFrame.size.height < bounds.size.height {
+            imageViewFrame.origin.y = (bounds.size.height - imageViewFrame.size.height) / 2.0
         } else {
             imageViewFrame.origin.y = 0.0
         }
@@ -233,7 +233,7 @@ extension MediaContentView: UIScrollViewDelegate {
 
         if let contentImage = image {
 
-            let imageViewSize = imageView.frame.size
+            let imageViewSize = imageView.bounds.size
             let imageSize = contentImage.size
             var targetImageSize = imageViewSize
 
