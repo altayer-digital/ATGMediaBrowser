@@ -54,4 +54,26 @@ public enum DefaultContentTransformers {
         let margin: CGFloat = 0.0000001
         contentView.isHidden = ((1.0-margin)...(1.0+margin) ~= abs(position))
     }
+
+    // GestureDirection : Vertical
+    // DrawOrder : PreviousToNext
+    public static let verticalSlideOut: ContentTransformer = { contentView, position in
+
+        var scale: CGFloat = 1.0
+        if position < -0.5 {
+            scale = 0.9
+        } else if -0.5...0.0 ~= Double(position) {
+            scale = 1.0 + (position * 0.2)
+        }
+        var transform = CGAffineTransform(scaleX: scale, y: scale)
+
+        let heightIncludingGap = contentView.bounds.size.height + MediaContentView.interItemSpacing
+        let y = position >= 0.0 ? heightIncludingGap * position : 0.0
+        transform = transform.translatedBy(x: 0.0, y: y)
+
+        contentView.transform = transform
+
+        let margin: CGFloat = 0.0000001
+        contentView.isHidden = ((1.0-margin)...(1.0+margin) ~= abs(position))
+    }
 }
