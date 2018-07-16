@@ -146,6 +146,12 @@ public class MediaBrowserViewController: UIViewController {
         return gesture
     }()
 
+    lazy private var mediaContainerView: UIView = { [unowned self] in
+        let container = UIView()
+        container.backgroundColor = .clear
+        return container
+    }()
+
     lazy private var closeButton: UIButton = { [unowned self] in
         let button = UIButton()
         button.setTitle(Constants.Close.title, for: .normal)
@@ -284,6 +290,15 @@ extension MediaBrowserViewController {
 
     private func populateContentViews() {
 
+        view.addSubview(mediaContainerView)
+        mediaContainerView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            mediaContainerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            mediaContainerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            mediaContainerView.topAnchor.constraint(equalTo: view.topAnchor),
+            mediaContainerView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+
         MediaContentView.interItemSpacing = gapBetweenMediaViews
         MediaContentView.contentTransformer = DefaultContentTransformers.horizontalMoveInOut
 
@@ -294,15 +309,15 @@ extension MediaBrowserViewController {
             let mediaView = MediaContentView(
                 index: i + index,
                 position: CGFloat(i),
-                frame: view.frame
+                frame: view.bounds
             )
-            view.addSubview(mediaView)
+            mediaContainerView.addSubview(mediaView)
             mediaView.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
-                mediaView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-                mediaView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-                mediaView.topAnchor.constraint(equalTo: view.topAnchor),
-                mediaView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+                mediaView.leadingAnchor.constraint(equalTo: mediaContainerView.leadingAnchor),
+                mediaView.trailingAnchor.constraint(equalTo: mediaContainerView.trailingAnchor),
+                mediaView.topAnchor.constraint(equalTo: mediaContainerView.topAnchor),
+                mediaView.bottomAnchor.constraint(equalTo: mediaContainerView.bottomAnchor)
             ])
 
             contentViews.append(mediaView)
@@ -535,6 +550,8 @@ extension MediaBrowserViewController {
             contentViews.removeFirst()
             contentViews.append(previousView)
 
+            mediaContainerView.bringSubview(toFront: previousView)
+
             delegate?.mediaBrowser(self, didChangeFocusTo: index)
 
         } else if middleView.position > (1 + normalizedGap - normalizedCenter) {
@@ -552,6 +569,8 @@ extension MediaBrowserViewController {
 
             contentViews.removeLast()
             contentViews.insert(nextView, at: 0)
+
+            mediaContainerView.sendSubview(toBack: nextView)
 
             delegate?.mediaBrowser(self, didChangeFocusTo: index)
         }
