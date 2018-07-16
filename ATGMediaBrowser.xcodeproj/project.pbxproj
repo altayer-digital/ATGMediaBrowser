@@ -8,12 +8,16 @@
 
 /* Begin PBXBuildFile section */
 		961F47B020FCBFF600DEF28F /* ATGMediaBrowser.h in Headers */ = {isa = PBXBuildFile; fileRef = 961F47AE20FCBFF600DEF28F /* ATGMediaBrowser.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		961F47B920FCC1E100DEF28F /* MediaContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961F47B720FCC1E100DEF28F /* MediaContentView.swift */; };
+		961F47BA20FCC1E100DEF28F /* MediaBrowserViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 961F47B820FCC1E100DEF28F /* MediaBrowserViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		961F47AB20FCBFF600DEF28F /* ATGMediaBrowser.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ATGMediaBrowser.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		961F47AE20FCBFF600DEF28F /* ATGMediaBrowser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ATGMediaBrowser.h; sourceTree = "<group>"; };
 		961F47AF20FCBFF600DEF28F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		961F47B720FCC1E100DEF28F /* MediaContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaContentView.swift; sourceTree = "<group>"; };
+		961F47B820FCC1E100DEF28F /* MediaBrowserViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaBrowserViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -46,10 +50,20 @@
 		961F47AD20FCBFF600DEF28F /* ATGMediaBrowser */ = {
 			isa = PBXGroup;
 			children = (
+				961F47B620FCC1E100DEF28F /* MediaBrowser */,
 				961F47AE20FCBFF600DEF28F /* ATGMediaBrowser.h */,
 				961F47AF20FCBFF600DEF28F /* Info.plist */,
 			);
 			path = ATGMediaBrowser;
+			sourceTree = "<group>";
+		};
+		961F47B620FCC1E100DEF28F /* MediaBrowser */ = {
+			isa = PBXGroup;
+			children = (
+				961F47B720FCC1E100DEF28F /* MediaContentView.swift */,
+				961F47B820FCC1E100DEF28F /* MediaBrowserViewController.swift */,
+			);
+			path = MediaBrowser;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -131,6 +145,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				961F47BA20FCC1E100DEF28F /* MediaBrowserViewController.swift in Sources */,
+				961F47B920FCC1E100DEF28F /* MediaContentView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
