@@ -12,13 +12,50 @@
 //
 
 // MARK: - MediaBrowserViewControllerDataSource protocol
-
+/// Protocol to supply media browser contents.
 public protocol MediaBrowserViewControllerDataSource: class {
 
-    typealias CompletionBlock = (Int, UIImage?, ZoomScale?, Error?) -> Void
+    /**
+     Completion block for passing requested media image with details.
+     - parameter index: Index of the requested media.
+     - parameter image: Image to be passed back to media browser.
+     - parameter zoomScale: Zoom scale to be applied to the image including min and max levels.
+     - parameter error: Error received while fetching the media image.
 
+     - note:
+        Remember to pass the index received in the datasource method back.
+        This index is used to set the image to the correct image view.
+     */
+    typealias CompletionBlock = (_ index: Int, _ image: UIImage?, _ zoomScale: ZoomScale?, _ error: Error?) -> Void
+
+    /**
+     Method to supply number of items to be shown in media browser.
+     - parameter mediaBrowser: Reference to media browser object.
+     - returns: An integer with number of items to be shown in media browser.
+     */
     func numberOfItems(in mediaBrowser: MediaBrowserViewController) -> Int
+
+    /**
+     Method to supply image for specific index.
+     - parameter mediaBrowser: Reference to media browser object.
+     - parameter index: Index of the requested media.
+     - parameter completion: Completion block to be executed on fetching the media image.
+     */
     func mediaBrowser(_ mediaBrowser: MediaBrowserViewController, imageAt index: Int, completion: @escaping CompletionBlock)
+
+    /**
+     This **optional method** callback is provided to update the styling of close button.
+     - parameter mediaBrowser: Reference to media browser object.
+     - parameter button: Reference to close button
+
+     - note:
+        You can modify the styling of the supplied button, and even add constraints to position
+     the button relative to it's superview. Remember that if no constraints are applied on the button,
+     default constraints will be applied on, and will be shown on top-right side of the view.
+
+        On top of that you can add target to this button to handle the closebutton event manually. By
+     default touch-up-inside event is used to close the media browser.
+     */
     func mediaBrowser(_ mediaBrowser: MediaBrowserViewController, updateCloseButton button: UIButton)
 }
 
@@ -31,6 +68,13 @@ extension MediaBrowserViewControllerDataSource {
 
 public protocol MediaBrowserViewControllerDelegate: class {
 
+    /**
+     Method invoked on scrolling to next/previous media items.
+     - parameter mediaBrowser: Reference to media browser object.
+     - parameter index: Index of the newly focussed media item.
+     - note:
+        This method will not be called on first load, and will be called only on swiping left and right.
+     */
     func mediaBrowser(_ mediaBrowser: MediaBrowserViewController, didChangeFocusTo index: Int)
 }
 
@@ -43,30 +87,67 @@ public class MediaBrowserViewController: UIViewController {
 
     // MARK: - Exposed Enumerations
 
+    /**
+     Enum to hold supported gesture directions.
+
+     ```
+     case horizontal
+     case vertical
+     ```
+    */
     public enum GestureDirection {
 
+        /// Horizontal (left - right) gestures.
         case horizontal
+        /// Vertical (up - down) gestures.
         case vertical
     }
 
+    /**
+     Enum to hold supported browser styles.
+
+     ```
+     case linear
+     case carousel
+     ```
+     */
     public enum BrowserStyle {
 
+        /// Linear browser with *0* as first index and *numItems-1* as last index.
         case linear
+        /// Carousel browser. The media items are repeated in a circular fashion.
         case carousel
     }
 
+    /**
+     Enum to hold supported content draw orders.
+
+     ```
+     case previousToNext
+     case nextToPrevious
+     ```
+     - note:
+        Remember that this is draw order, not positioning. This order decides which item will
+     be above or below other items, when they overlap.
+     */
     public enum ContentDrawOrder {
 
+        /// In this mode, media items are rendered in [previous]-[current]-[next] order.
         case previousToNext
+        /// In this mode, media items are rendered in [next]-[current]-[previous] order.
         case nextToPrevious
     }
 
     // MARK: - Exposed variables
 
+    /// Data-source object to supply media browser contents.
     public weak var dataSource: MediaBrowserViewControllerDataSource?
+    /// Delegate object to get callbacks on media browser events.
     public weak var delegate: MediaBrowserViewControllerDelegate?
 
+    /// Gesture direction. Default is `horizontal`.
     public var gestureDirection: GestureDirection = .horizontal
+    /// Content transformer closure. Default is `horizontalMoveInOut`.
     public var contentTransformer: ContentTransformer = DefaultContentTransformers.horizontalMoveInOut {
         didSet {
 
@@ -74,6 +155,7 @@ public class MediaBrowserViewController: UIViewController {
             contentViews.forEach({ $0.updateTransform() })
         }
     }
+    /// Content draw order. Default is `previousToNext`.
     public var drawOrder: ContentDrawOrder = .previousToNext {
         didSet {
             if oldValue != drawOrder {
@@ -81,19 +163,26 @@ public class MediaBrowserViewController: UIViewController {
             }
         }
     }
-
+    /// Browser style. Default is carousel.
     public var browserStyle: BrowserStyle = .carousel
+    /// Gap between consecutive media items. Default is `50.0`.
     public var gapBetweenMediaViews: CGFloat = Constants.gapBetweenContents {
         didSet {
             MediaContentView.interItemSpacing = gapBetweenMediaViews
             contentViews.forEach({ $0.updateTransform() })
         }
     }
+    /// Variable to hide/show controls(close & page control). Default is false.
     public var hideControls: Bool = false {
         didSet {
             hideControlViews(hideControls)
         }
     }
+    /**
+    Variable to schedule/cancel auto-hide controls(close & page control). Default is false.
+    Default delay is `3.0` seconds.
+    - todo: Update to accept auto-hide-delay.
+     */
     public var autoHideControls: Bool = false {
         didSet {
             if autoHideControls {

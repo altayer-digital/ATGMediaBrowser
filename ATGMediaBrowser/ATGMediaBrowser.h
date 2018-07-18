@@ -11,7 +11,7 @@
 //  Any reproduction of this material must contain this notice.
 //
 
-#import <UIKit/UIKit.h>
+@import UIKit;
 
 //! Project version number for ATGMediaBrowser.
 FOUNDATION_EXPORT double ATGMediaBrowserVersionNumber;

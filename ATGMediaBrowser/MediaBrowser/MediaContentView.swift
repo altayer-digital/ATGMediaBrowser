@@ -11,11 +11,17 @@
 //  Any reproduction of this material must contain this notice.
 //
 
+
+/// Holds the value of minimumZoomScale and maximumZoomScale of the image.
 public struct ZoomScale {
 
+    /// Minimum zoom level, the image can be zoomed out to.
     public var minimumZoomScale: CGFloat
+
+    /// Maximum zoom level, the image can be zoomed into.
     public var maximumZoomScale: CGFloat
 
+    /// Default zoom scale. minimum is 1.0 and maximum is 3.0
     public static let `default` = ZoomScale(
         minimumZoomScale: 1.0,
         maximumZoomScale: 3.0

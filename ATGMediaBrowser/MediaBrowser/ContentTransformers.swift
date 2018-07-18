@@ -11,30 +11,64 @@
 //  Any reproduction of this material must contain this notice.
 //
 
-public typealias ContentTransformer = (UIView, CGFloat) -> Void
+/**
+ Content transformer used for transition between media item views.
+
+ - parameter contentView: The content view on which transform corresponding to the position has to be applied.
+ - parameter position: Current position for the passed content view.
+
+ - note:
+    The trasnform to be applied on the contentView has to be dependent on the position passed.
+    The position value can be -ve, 0.0 or positive.
+
+    Try to visualize content views at -1.0[previous]=>0.0[current]=>1.0[next].
+
+    1. When position is -1.0, the content view should be at the place meant for previous view.
+
+    2. When the position is 0.0, the transform applied on the content view should make it visible full screen at origin.
+
+    3. When position is 1.0, the content view should be at the place meant for next view.
+
+    Be mindful of the drawing order, when designing new transitions.
+ */
+public typealias ContentTransformer = (_ contentView: UIView, _ position: CGFloat) -> Void
 
 // MARK: - Default Transitions
 
+/// An enumeration to hold default content transformers
 public enum DefaultContentTransformers {
 
-    // GestureDirection : Horizontal
-    // DrawOrder : Any
+    /**
+     Horizontal move-in-out content transformer.
+
+     - Requires:
+         * GestureDirection: Horizontal
+    */
     public static let horizontalMoveInOut: ContentTransformer = { contentView, position in
 
         let widthIncludingGap = contentView.bounds.size.width + MediaContentView.interItemSpacing
         contentView.transform = CGAffineTransform(translationX: widthIncludingGap * position, y: 0.0)
     }
 
-    // GestureDirection : Vertical
-    // DrawOrder : Any
+    /**
+     Vertical move-in-out content transformer.
+
+     - Requires:
+        * GestureDirection: Vertical
+     */
     public static let verticalMoveInOut: ContentTransformer = { contentView, position in
 
         let heightIncludingGap = contentView.bounds.size.height + MediaContentView.interItemSpacing
         contentView.transform = CGAffineTransform(translationX: 0.0, y: heightIncludingGap * position)
     }
 
-    // GestureDirection : Horizontal
-    // DrawOrder : PreviousToNext
+    /**
+     Horizontal slide-out content transformer.
+
+     - Requires:
+        * GestureDirection: Horizontal
+        * DrawOrder: PreviousToNext
+     */
     public static let horizontalSlideOut: ContentTransformer = { contentView, position in
 
         var scale: CGFloat = 1.0
@@ -55,8 +89,13 @@ public enum DefaultContentTransformers {
         contentView.isHidden = ((1.0-margin)...(1.0+margin) ~= abs(position))
     }
 
-    // GestureDirection : Vertical
-    // DrawOrder : PreviousToNext
+    /**
+     Vertical slide-out content transformer.
+
+     - Requires:
+         * GestureDirection: Vertical
+         * DrawOrder: PreviousToNext
+     */
     public static let verticalSlideOut: ContentTransformer = { contentView, position in
 
         var scale: CGFloat = 1.0
@@ -77,8 +116,13 @@ public enum DefaultContentTransformers {
         contentView.isHidden = ((1.0-margin)...(1.0+margin) ~= abs(position))
     }
 
-    // GestureDirection : Horizontal
-    // DrawOrder : NextToPrevious
+    /**
+     Horizontal slide-in content transformer.
+
+     - Requires:
+         * GestureDirection: Horizontal
+         * DrawOrder: NextToPrevious
+     */
     public static let horizontalSildeIn: ContentTransformer = { contentView, position in
 
         var scale: CGFloat = 1.0
@@ -99,8 +143,13 @@ public enum DefaultContentTransformers {
         contentView.isHidden = ((1.0-margin)...(1.0+margin) ~= abs(position))
     }
 
-    // GestureDirection : Vertical
-    // DrawOrder : NextToPrevious
+    /**
+     Vertical slide-in content transformer.
+
+     - Requires:
+         * GestureDirection: Vertical
+         * DrawOrder: NextToPrevious
+     */
     public static let verticalSlideIn: ContentTransformer = { contentView, position in
 
         var scale: CGFloat = 1.0
