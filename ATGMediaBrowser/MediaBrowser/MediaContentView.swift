@@ -139,6 +139,7 @@ extension MediaContentView {
         canCancelContentTouches = false
         zoomLevels = ZoomScale.default
         delegate = self
+        bouncesZoom = false
     }
 
     private func setupIndicatorView() {
