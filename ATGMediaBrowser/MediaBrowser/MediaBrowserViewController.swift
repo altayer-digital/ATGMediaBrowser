@@ -196,6 +196,12 @@ public class MediaBrowserViewController: UIViewController {
         }
     }
 
+    /// Item index of the current item. In range `0..<numMediaItems`
+    public var currentItemIndex: Int {
+
+        return sanitizeIndex(index)
+    }
+
     // MARK: - Private Enumerations
 
     private enum Constants {
@@ -268,7 +274,7 @@ public class MediaBrowserViewController: UIViewController {
         return gesture
     }()
 
-    lazy private var mediaContainerView: UIView = { [unowned self] in
+    lazy internal private(set) var mediaContainerView: UIView = { [unowned self] in
         let container = UIView()
         container.backgroundColor = .clear
         return container
@@ -295,8 +301,15 @@ public class MediaBrowserViewController: UIViewController {
         return pageControl
     }()
 
+    lazy internal private(set) var visualEffectContainer: UIView = { [unowned self] in
+        let view = UIView()
+        view.backgroundColor = .magenta
+        return view
+    }()
     lazy private var visualEffectContentView: UIImageView = { [unowned self] in
-        return UIImageView(frame: view.frame)
+        let imageView = UIImageView(frame: view.frame)
+        imageView.contentMode = .scaleAspectFill
+        return imageView
     }()
     lazy private var blurEffect: UIBlurEffect = {
         return UIBlurEffect(style: .dark)
@@ -308,6 +321,11 @@ public class MediaBrowserViewController: UIViewController {
     private var numMediaItems: Int {
         return dataSource?.numberOfItems(in: self) ?? 1
     }
+
+    private lazy var dismissController = DismissAnimationController(
+        gestureDirection: gestureDirection,
+        viewController: self
+    )
 
     // MARK: - Initializers
 
@@ -335,7 +353,7 @@ public class MediaBrowserViewController: UIViewController {
 
     private func initialize() {
 
-        view.backgroundColor = .black
+        view.backgroundColor = .clear
 
         modalPresentationStyle = .custom
 
@@ -386,22 +404,31 @@ extension MediaBrowserViewController {
 
     private func addVisualEffectView() {
 
-        view.addSubview(visualEffectContentView)
-        visualEffectContentView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(visualEffectContainer)
+        visualEffectContainer.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            visualEffectContentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            visualEffectContentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            visualEffectContentView.topAnchor.constraint(equalTo: view.topAnchor),
-            visualEffectContentView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            visualEffectContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            visualEffectContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            visualEffectContainer.topAnchor.constraint(equalTo: view.topAnchor),
+            visualEffectContainer.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
 
-        view.addSubview(visualEffectView)
+        visualEffectContainer.addSubview(visualEffectContentView)
+        visualEffectContentView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            visualEffectContentView.leadingAnchor.constraint(equalTo: visualEffectContainer.leadingAnchor),
+            visualEffectContentView.trailingAnchor.constraint(equalTo: visualEffectContainer.trailingAnchor),
+            visualEffectContentView.topAnchor.constraint(equalTo: visualEffectContainer.topAnchor),
+            visualEffectContentView.bottomAnchor.constraint(equalTo: visualEffectContainer.bottomAnchor)
+        ])
+
+        visualEffectContainer.addSubview(visualEffectView)
         visualEffectView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            visualEffectView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            visualEffectView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            visualEffectView.topAnchor.constraint(equalTo: view.topAnchor),
-            visualEffectView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            visualEffectView.leadingAnchor.constraint(equalTo: visualEffectContainer.leadingAnchor),
+            visualEffectView.trailingAnchor.constraint(equalTo: visualEffectContainer.trailingAnchor),
+            visualEffectView.topAnchor.constraint(equalTo: visualEffectContainer.topAnchor),
+            visualEffectView.bottomAnchor.constraint(equalTo: visualEffectContainer.bottomAnchor)
         ])
     }
 
@@ -512,6 +539,11 @@ extension MediaBrowserViewController {
 
     @objc private func panGestureEvent(_ recognizer: UIPanGestureRecognizer) {
 
+        if dismissController.interactionInProgress {
+            dismissController.handleInteractiveTransition(recognizer)
+            return
+        }
+
         let translation = recognizer.translation(in: view)
 
         switch recognizer.state {
@@ -577,6 +609,10 @@ extension MediaBrowserViewController {
     }
 
     @objc private func tapGestureEvent(_ recognizer: UITapGestureRecognizer) {
+
+        guard !dismissController.interactionInProgress else {
+            return
+        }
 
         if !controlToggleTask.isCancelled {
             controlToggleTask.cancel()
@@ -757,11 +793,36 @@ extension MediaBrowserViewController {
         }
         return newIndex
     }
+
+    func sourceImage() -> UIImage? {
+
+        guard contentViews.count > 1 else { return nil }
+
+        return contentViews[1].image
+    }
 }
 
 // MARK: - UIGestureRecognizerDelegate
 
 extension MediaBrowserViewController: UIGestureRecognizerDelegate {
+
+    public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+
+        if let recognizer = gestureRecognizer as? UIPanGestureRecognizer {
+
+            let translation = recognizer.translation(in: recognizer.view)
+
+            if gestureDirection == .horizontal {
+                dismissController.interactionInProgress = abs(translation.y) > abs(translation.x)
+            } else {
+                dismissController.interactionInProgress = abs(translation.x) > abs(translation.y)
+            }
+            if dismissController.interactionInProgress {
+                dismissController.image = sourceImage()
+            }
+        }
+        return true
+    }
 
     public func gestureRecognizer(
         _ gestureRecognizer: UIGestureRecognizer,
