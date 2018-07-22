@@ -30,11 +30,14 @@ internal class DismissAnimationController: NSObject {
     private var backgroundView: UIView?
 
     private var timer: Timer?
-    private var distanceToMove: CGFloat = 0.0
-    private var relativePosition: CGFloat = 0.0 {
+    private var distanceToMove: CGPoint = .zero
+    private var relativePosition: CGPoint = .zero {
         didSet {
             updateTransition()
         }
+    }
+    private var progressValue: CGFloat {
+        return (gestureDirection == .horizontal) ? relativePosition.y : relativePosition.x
     }
 
     init(
@@ -52,12 +55,10 @@ internal class DismissAnimationController: NSObject {
 
         let translation = recognizer.translation(in: recognizer.view)
 
-        var progress: CGFloat = 0.0
-        if gestureDirection == .horizontal {
-            progress = translation.y / UIScreen.main.bounds.size.height
-        } else {
-            progress = translation.x / UIScreen.main.bounds.size.width
-        }
+        let progress = CGPoint(
+            x: translation.x / UIScreen.main.bounds.size.width,
+            y: translation.y / UIScreen.main.bounds.size.height
+        )
 
         switch recognizer.state {
         case .began:
@@ -68,13 +69,19 @@ internal class DismissAnimationController: NSObject {
         case .ended, .cancelled, .failed:
             var toMove: CGFloat = 0.0
 
-            if fabs(progress) > Constants.minimumTranslation {
-                toMove = (progress / fabs(progress))
+            if fabs(progressValue) > Constants.minimumTranslation {
+                toMove = (progressValue / fabs(progressValue))
             } else {
-                toMove = -progress
+                toMove = -progressValue
             }
 
-            distanceToMove = toMove
+            if gestureDirection == .horizontal {
+                distanceToMove.x = -relativePosition.x
+                distanceToMove.y = toMove
+            } else {
+                distanceToMove.x = toMove
+                distanceToMove.y = -relativePosition.y
+            }
 
             if timer == nil {
                 timer = Timer.scheduledTimer(
@@ -92,18 +99,22 @@ internal class DismissAnimationController: NSObject {
 
     @objc private func update(_ timeInterval: TimeInterval) {
 
-        let distance = distanceToMove / (Constants.updateFrameRate * 0.15)
-        distanceToMove -= distance
-        relativePosition += distance
+        let xDistance = distanceToMove.x / (Constants.updateFrameRate * 0.15)
+        let yDistance = distanceToMove.y / (Constants.updateFrameRate * 0.15)
+        distanceToMove.x -= xDistance
+        distanceToMove.y -= yDistance
+        relativePosition.x += xDistance
+        relativePosition.y += yDistance
 
         let translation = CGPoint(
-            x: distance * (UIScreen.main.bounds.size.width),
-            y: distance * (UIScreen.main.bounds.size.height)
+            x: xDistance * (UIScreen.main.bounds.size.width),
+            y: yDistance * (UIScreen.main.bounds.size.height)
         )
         let directionalTranslation = (gestureDirection == .horizontal) ? translation.y : translation.x
         if fabs(directionalTranslation) < 1.0 {
 
-            relativePosition += distanceToMove
+            relativePosition.x += distanceToMove.x
+            relativePosition.y += distanceToMove.y
             interactionInProgress = false
 
             finishTransition()
@@ -121,7 +132,7 @@ internal class DismissAnimationController: NSObject {
 
     private func finishTransition() {
 
-        distanceToMove = 0.0
+        distanceToMove = .zero
         timer?.invalidate()
         timer = nil
 
@@ -130,7 +141,8 @@ internal class DismissAnimationController: NSObject {
         backgroundView?.removeFromSuperview()
         backgroundView = nil
 
-        if relativePosition != 0.0 {
+        let directionalPosition = (gestureDirection == .horizontal) ? relativePosition.y : relativePosition.x
+        if directionalPosition != 0.0 {
             viewController?.dismiss(animated: false, completion: nil)
         } else {
             viewController?.mediaContainerView.isHidden = false
@@ -165,20 +177,30 @@ internal class DismissAnimationController: NSObject {
     private func updateTransition() {
 
         var transform = CGAffineTransform.identity
+        let directionalPosition = (gestureDirection == .horizontal) ? relativePosition.y : relativePosition.x
+
+        // TODO: This will be configured dependent on if datasource is passing a source frame.
+        let zoomOut = true
+
+        if zoomOut {
+            let scale = CGFloat.maximum(0.9, (1.0 - fabs(directionalPosition)))
+            transform = transform.scaledBy(x: scale, y: scale)
+        }
+
         if gestureDirection == .horizontal {
             transform = transform.translatedBy(
-                x: 0.0,
-                y: relativePosition * UIScreen.main.bounds.size.height
+                x: zoomOut ? relativePosition.x * UIScreen.main.bounds.size.width : 0.0,
+                y: relativePosition.y * UIScreen.main.bounds.size.height
             )
         } else {
             transform = transform.translatedBy(
-                x: relativePosition * UIScreen.main.bounds.size.width,
-                y: 0.0
+                x: relativePosition.x * UIScreen.main.bounds.size.width,
+                y: zoomOut ? relativePosition.y * UIScreen.main.bounds.size.height : 0.0
             )
         }
         imageView.transform = transform
 
-        let alpha = (relativePosition < 0.0) ? relativePosition + 1.0 : 1.0 - relativePosition
+        let alpha = (directionalPosition < 0.0) ? directionalPosition + 1.0 : 1.0 - directionalPosition
         backgroundView?.alpha = alpha
     }
 
