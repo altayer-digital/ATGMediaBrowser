@@ -57,11 +57,21 @@ public protocol MediaBrowserViewControllerDataSource: class {
      default touch-up-inside event is used to close the media browser.
      */
     func mediaBrowser(_ mediaBrowser: MediaBrowserViewController, updateCloseButton button: UIButton)
+
+    /**
+     This method is used to get the target frame into which the browser will perform the dismiss transition.
+     - parameter mediaBrowser: Reference to media browser object.
+
+     - note:
+        If this method is not implemented, the media browser will perform slide up/down transition on dismissal.
+    */
+    func targetFrameForDismissal(_ mediaBrowser: MediaBrowserViewController) -> CGRect?
 }
 
 extension MediaBrowserViewControllerDataSource {
 
     func mediaBrowser(_ mediaBrowser: MediaBrowserViewController, updateCloseButton button: UIButton) {}
+    func targetFrameForDismissal(_ mediaBrowser: MediaBrowserViewController) -> CGRect? { return nil }
 }
 
 // MARK: - MediaBrowserViewControllerDelegate protocol
