@@ -337,6 +337,24 @@ public class MediaBrowserViewController: UIViewController {
         viewController: self
     )
 
+    // MARK: - Public methods
+
+    /// Invoking this method reloads the contents media browser.
+    public func reloadContentViews() {
+
+        numMediaItems = dataSource?.numberOfItems(in: self) ?? 0
+        if shouldShowPageControl {
+            pageControl.numberOfPages = numMediaItems
+        }
+
+        for contentView in contentViews {
+
+            updateContents(of: contentView)
+        }
+
+        dataSource?.mediaBrowser(self, updateCloseButton: closeButton)
+    }
+
     // MARK: - Initializers
 
     public init(
