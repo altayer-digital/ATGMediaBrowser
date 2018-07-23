@@ -539,7 +539,13 @@ extension MediaBrowserViewController {
 
     @objc private func didTapOnClose(_ sender: UIButton) {
 
-        dismiss(animated: true, completion: nil)
+        if let targetFrame = dataSource?.targetFrameForDismissal(self) {
+            dismissController.image = sourceImage()
+            dismissController.beginTransition()
+            dismissController.animateToTargetFrame(targetFrame)
+        } else {
+            dismiss(animated: true, completion: nil)
+        }
     }
 }
 

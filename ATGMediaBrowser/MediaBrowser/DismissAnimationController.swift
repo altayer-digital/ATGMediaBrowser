@@ -105,7 +105,7 @@ internal class DismissAnimationController: NSObject {
         }
     }
 
-    private func animateToTargetFrame(_ target: CGRect) {
+    internal func animateToTargetFrame(_ target: CGRect) {
 
         let frame = imageViewFrame(for: imageView.bounds.size, in: target, mode: .scaleAspectFill)
         UIView.animate(withDuration: Constants.transitionDuration, animations: {
@@ -153,7 +153,7 @@ internal class DismissAnimationController: NSObject {
         }
     }
 
-    private func beginTransition() {
+    internal func beginTransition() {
 
         shouldZoomOutOnInteraction = false
         if let viewController = viewController {
