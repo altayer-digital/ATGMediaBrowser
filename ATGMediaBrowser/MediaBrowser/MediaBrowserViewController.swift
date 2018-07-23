@@ -182,6 +182,12 @@ public class MediaBrowserViewController: UIViewController {
             contentViews.forEach({ $0.updateTransform() })
         }
     }
+    /// Variable to hide/show page control in media browser.
+    public var shouldShowPageControl: Bool = true {
+        didSet {
+            pageControl.isHidden = !shouldShowPageControl
+        }
+    }
     /// Variable to hide/show controls(close & page control). Default is false.
     public var hideControls: Bool = false {
         didSet {
@@ -311,11 +317,7 @@ public class MediaBrowserViewController: UIViewController {
         return pageControl
     }()
 
-    lazy internal private(set) var visualEffectContainer: UIView = { [unowned self] in
-        let view = UIView()
-        view.backgroundColor = .magenta
-        return view
-    }()
+    lazy internal private(set) var visualEffectContainer: UIView = UIView()
     lazy private var visualEffectContentView: UIImageView = { [unowned self] in
         let imageView = UIImageView(frame: view.frame)
         imageView.contentMode = .scaleAspectFill
