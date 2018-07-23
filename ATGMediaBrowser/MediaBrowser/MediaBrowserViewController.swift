@@ -330,9 +330,7 @@ public class MediaBrowserViewController: UIViewController {
         return UIVisualEffectView(effect: blurEffect)
     }()
 
-    private var numMediaItems: Int {
-        return dataSource?.numberOfItems(in: self) ?? 1
-    }
+    private var numMediaItems = 0
 
     private lazy var dismissController = DismissAnimationController(
         gestureDirection: gestureDirection,
@@ -385,6 +383,8 @@ extension MediaBrowserViewController {
     override public func viewDidLoad() {
 
         super.viewDidLoad()
+
+        numMediaItems = dataSource?.numberOfItems(in: self) ?? 0
 
         addVisualEffectView()
 
@@ -478,7 +478,9 @@ extension MediaBrowserViewController {
 
             contentViews.append(mediaView)
 
-            updateContents(of: mediaView)
+            if numMediaItems > 0 {
+                updateContents(of: mediaView)
+            }
         }
         if drawOrder == .nextToPrevious {
             mediaContainerView.exchangeSubview(at: 0, withSubviewAt: 2)
@@ -562,6 +564,10 @@ extension MediaBrowserViewController {
             return
         }
 
+        guard numMediaItems > 0 else {
+            return
+        }
+
         let translation = recognizer.translation(in: view)
 
         switch recognizer.state {
@@ -600,7 +606,7 @@ extension MediaBrowserViewController {
                 }
             }
 
-            if browserStyle == .linear {
+            if browserStyle == .linear || numMediaItems <= 1 {
                 if (middleView.index == 0 && ((middleView.position + toMove) > 0.0)) ||
                     (middleView.index == (numMediaItems - 1) && (middleView.position + toMove) < 0.0) {
 
@@ -769,7 +775,7 @@ extension MediaBrowserViewController {
             y: (translation.y)/viewSize.height
         )
 
-        if browserStyle != .carousel {
+        if browserStyle != .carousel || numMediaItems <= 1 {
             let isGestureHorizontal = (gestureDirection == .horizontal)
             let directionalTranslation = isGestureHorizontal ? normalizedTranslation.x : normalizedTranslation.y
             if (middleView.index == 0 && ((middleView.position + directionalTranslation) > 0.0)) ||
