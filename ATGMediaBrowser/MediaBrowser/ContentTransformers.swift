@@ -169,4 +169,56 @@ public enum DefaultContentTransformers {
         let margin: CGFloat = 0.0000001
         contentView.isHidden = ((1.0-margin)...(1.0+margin) ~= abs(position))
     }
+
+    /**
+     Horizontal zoom-in-out content transformer.
+
+     - Requires:
+     * GestureDirection: Horizontal
+     */
+    public static let horizontalZoomInOut: ContentTransformer = { contentView, position in
+
+        let minScale: CGFloat = 0.5
+        // Scale factor is used to reduce the scale animation speed.
+        let scaleFactor: CGFloat = 0.5
+        var scale: CGFloat = CGFloat.maximum(minScale, 1.0 - fabs(position * scaleFactor))
+
+        // Actual gap will be scaleFactor * 0.5 times of contentView.bounds.size.width.
+        let actualGap = contentView.bounds.size.width * scaleFactor * 0.5
+        let gapCorrector = MediaContentView.interItemSpacing - actualGap
+
+        let widthIncludingGap = contentView.bounds.size.width + gapCorrector
+        let translation = (widthIncludingGap * position)/scale
+
+        var transform = CGAffineTransform(scaleX: scale, y: scale)
+        transform = transform.translatedBy(x: translation, y: 0.0)
+
+        contentView.transform = transform
+    }
+
+    /**
+     Vertical zoom-in-out content transformer.
+
+     - Requires:
+     * GestureDirection: Vertical
+     */
+    public static let verticalZoomInOut: ContentTransformer = { contentView, position in
+
+        let minScale: CGFloat = 0.5
+        // Scale factor is used to reduce the scale animation speed.
+        let scaleFactor: CGFloat = 0.5
+        let scale: CGFloat = CGFloat.maximum(minScale, 1.0 - fabs(position * scaleFactor))
+
+        // Actual gap will be scaleFactor * 0.5 times of contentView.bounds.size.height.
+        let actualGap = contentView.bounds.size.height * scaleFactor * 0.5
+        let gapCorrector = MediaContentView.interItemSpacing - actualGap
+
+        let heightIncludingGap = contentView.bounds.size.height + gapCorrector
+        let translation = (heightIncludingGap * position)/scale
+
+        var transform = CGAffineTransform(scaleX: scale, y: scale)
+        transform = transform.translatedBy(x: 0.0, y: translation)
+
+        contentView.transform = transform
+    }
 }
