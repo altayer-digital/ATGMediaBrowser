@@ -32,7 +32,11 @@ internal class MediaContentView: UIScrollView {
 
     // MARK: - Exposed variables
     internal static var interItemSpacing: CGFloat = 0.0
-    internal var index: Int
+    internal var index: Int {
+        didSet {
+            resetZoom()
+        }
+    }
     internal static var contentTransformer: ContentTransformer = DefaultContentTransformers.horizontalMoveInOut
 
     internal var position: CGFloat {
@@ -146,6 +150,14 @@ extension MediaContentView {
         zoomLevels = ZoomScale.default
         delegate = self
         bouncesZoom = false
+    }
+
+    private func resetZoom() {
+
+        setZoomScale(1.0, animated: false)
+        imageView.transform = CGAffineTransform.identity
+        contentSize = imageView.frame.size
+        contentOffset = .zero
     }
 
     private func setupIndicatorView() {
