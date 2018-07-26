@@ -191,13 +191,26 @@ extension MediaContentView {
         MediaContentView.contentTransformer(self, position)
     }
 
+    internal func handleChangeInViewSize(to size: CGSize) {
+
+        let oldScale = zoomScale
+        zoomScale = 1.0
+        imageView.frame = CGRect(origin: .zero, size: size)
+
+        updateImageView()
+        updateTransform()
+        setZoomScale(oldScale, animated: false)
+
+        contentSize = imageView.frame.size
+    }
+
     @objc private func didDoubleTap(_ recognizer: UITapGestureRecognizer) {
 
         let locationInImage = recognizer.location(in: imageView)
 
         let isImageCoveringScreen = imageView.frame.size.width > bounds.size.width &&
             imageView.frame.size.height > bounds.size.height
-        let zoomTo = isImageCoveringScreen ? minimumZoomScale : maximumZoomScale
+        let zoomTo = (isImageCoveringScreen || zoomScale == maximumZoomScale) ? minimumZoomScale : maximumZoomScale
 
         let width = bounds.size.width / zoomTo
         let height = bounds.size.height / zoomTo

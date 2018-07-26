@@ -432,6 +432,18 @@ extension MediaBrowserViewController {
         }
     }
 
+    public override func viewWillTransition(
+        to size: CGSize,
+        with coordinator: UIViewControllerTransitionCoordinator
+        ) {
+
+        coordinator.animate(alongsideTransition: { context in
+            self.contentViews.forEach({ $0.handleChangeInViewSize(to: size) })
+        }, completion: nil)
+
+        super.viewWillTransition(to: size, with: coordinator)
+    }
+
     private func addVisualEffectView() {
 
         view.addSubview(visualEffectContainer)
@@ -786,7 +798,9 @@ extension MediaBrowserViewController {
 
     private func calculateNormalizedTranslation(translation: CGPoint, viewSize: CGSize) -> CGPoint {
 
-        let middleView = contentViews[1]
+        guard let middleView = mediaView(at: 1) else {
+            return .zero
+        }
 
         var normalizedTranslation = CGPoint(
             x: (translation.x)/viewSize.width,
@@ -836,11 +850,19 @@ extension MediaBrowserViewController {
         return newIndex
     }
 
-    func sourceImage() -> UIImage? {
+    private func sourceImage() -> UIImage? {
 
-        guard contentViews.count > 1 else { return nil }
+        return mediaView(at: 1)?.image
+    }
 
-        return contentViews[1].image
+    private func mediaView(at index: Int) -> MediaContentView? {
+
+        guard index < contentViews.count else {
+
+            assertionFailure("Content views does not have this many views. : \(index)")
+            return nil
+        }
+        return contentViews[index]
     }
 }
 
@@ -850,7 +872,9 @@ extension MediaBrowserViewController: UIGestureRecognizerDelegate {
 
     public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
 
-        if let recognizer = gestureRecognizer as? UIPanGestureRecognizer {
+        let middleView = mediaView(at: 1)
+        if middleView?.zoomScale == middleView?.zoomLevels?.minimumZoomScale,
+            let recognizer = gestureRecognizer as? UIPanGestureRecognizer {
 
             let translation = recognizer.translation(in: recognizer.view)
 
