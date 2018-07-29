@@ -827,18 +827,28 @@ extension MediaBrowserViewController {
         contentView.image = nil
         let convertedIndex = sanitizeIndex(contentView.index)
         contentView.isLoading = true
-        dataSource?.mediaBrowser(self, imageAt: convertedIndex, completion: { (index, image, zoom, _) in
+        dataSource?.mediaBrowser(
+            self,
+            imageAt: convertedIndex,
+            completion: { [weak self] (index, image, zoom, _) in
 
-            if convertedIndex == index && image != nil {
-                contentView.image = image
-                contentView.zoomLevels = zoom
+                guard let strongSelf = self else {
+                    return
+                }
 
-                if index == self.index {
-                    self.visualEffectContentView.image = image
+                if index == strongSelf.sanitizeIndex(contentView.index) {
+                    if image != nil {
+                        contentView.image = image
+                        contentView.zoomLevels = zoom
+
+                        if index == strongSelf.index {
+                            strongSelf.visualEffectContentView.image = image
+                        }
+                    }
+                    contentView.isLoading = false
                 }
             }
-            contentView.isLoading = false
-        })
+        )
     }
 
     private func sanitizeIndex(_ index: Int) -> Int {
