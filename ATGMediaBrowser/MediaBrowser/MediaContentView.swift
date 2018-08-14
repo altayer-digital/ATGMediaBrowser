@@ -23,9 +23,26 @@ public struct ZoomScale {
 
     /// Default zoom scale. minimum is 1.0 and maximum is 3.0
     public static let `default` = ZoomScale(
-        minimumZoomScale: 1.0,
-        maximumZoomScale: 3.0
+        minimum: 1.0,
+        maximum: 3.0
     )
+
+    /// Identity zoom scale. Pass this to disable zoom.
+    public static let identity = ZoomScale(
+        minimum: 1.0,
+        maximum: 1.0
+    )
+
+    /**
+     Initializer.
+     - parameter minimum: The minimum zoom level.
+     - parameter maximum: The maximum zoom level.
+     */
+    public init(minimum: CGFloat, maximum: CGFloat) {
+
+        minimumZoomScale = minimum
+        maximumZoomScale = maximum
+    }
 }
 
 internal class MediaContentView: UIScrollView {
@@ -212,6 +229,10 @@ extension MediaContentView {
             imageView.frame.size.height > bounds.size.height
         let zoomTo = (isImageCoveringScreen || zoomScale == maximumZoomScale) ? minimumZoomScale : maximumZoomScale
 
+        guard zoomTo != zoomScale else {
+            return
+        }
+
         let width = bounds.size.width / zoomTo
         let height = bounds.size.height / zoomTo
 
@@ -266,7 +287,7 @@ extension MediaContentView: UIScrollViewDelegate {
 
         if let contentImage = image {
 
-            let imageViewSize = imageView.bounds.size
+            let imageViewSize = bounds.size
             let imageSize = contentImage.size
             var targetImageSize = imageViewSize
 

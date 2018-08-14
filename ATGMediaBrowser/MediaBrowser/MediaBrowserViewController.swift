@@ -70,8 +70,8 @@ public protocol MediaBrowserViewControllerDataSource: class {
 
 extension MediaBrowserViewControllerDataSource {
 
-    func mediaBrowser(_ mediaBrowser: MediaBrowserViewController, updateCloseButton button: UIButton) {}
-    func targetFrameForDismissal(_ mediaBrowser: MediaBrowserViewController) -> CGRect? { return nil }
+    public func mediaBrowser(_ mediaBrowser: MediaBrowserViewController, updateCloseButton button: UIButton) {}
+    public func targetFrameForDismissal(_ mediaBrowser: MediaBrowserViewController) -> CGRect? { return nil }
 }
 
 // MARK: - MediaBrowserViewControllerDelegate protocol
@@ -90,7 +90,7 @@ public protocol MediaBrowserViewControllerDelegate: class {
 
 extension MediaBrowserViewControllerDelegate {
 
-    func mediaBrowser(_ mediaBrowser: MediaBrowserViewController, didChangeFocusTo index: Int) {}
+    public func mediaBrowser(_ mediaBrowser: MediaBrowserViewController, didChangeFocusTo index: Int) {}
 }
 
 public class MediaBrowserViewController: UIViewController {
