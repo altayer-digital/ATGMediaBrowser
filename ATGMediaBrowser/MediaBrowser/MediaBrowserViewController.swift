@@ -211,7 +211,8 @@ public class MediaBrowserViewController: UIViewController {
             }
         }
     }
-
+    /// Enable or disable interactive dismissal. Default is enabled.
+    public var enableInteractiveDismissal: Bool = true
     /// Item index of the current item. In range `0..<numMediaItems`
     public var currentItemIndex: Int {
 
@@ -358,7 +359,7 @@ public class MediaBrowserViewController: UIViewController {
     // MARK: - Initializers
 
     public init(
-        index: Int,
+        index: Int = 0,
         dataSource: MediaBrowserViewControllerDataSource,
         delegate: MediaBrowserViewControllerDelegate? = nil
         ) {
@@ -881,6 +882,10 @@ extension MediaBrowserViewController {
 extension MediaBrowserViewController: UIGestureRecognizerDelegate {
 
     public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+
+        guard enableInteractiveDismissal else {
+            return true
+        }
 
         let middleView = mediaView(at: 1)
         if middleView?.zoomScale == middleView?.zoomLevels?.minimumZoomScale,

@@ -123,7 +123,7 @@ public enum DefaultContentTransformers {
          * GestureDirection: Horizontal
          * DrawOrder: NextToPrevious
      */
-    public static let horizontalSildeIn: ContentTransformer = { contentView, position in
+    public static let horizontalSlideIn: ContentTransformer = { contentView, position in
 
         var scale: CGFloat = 1.0
         if position > 0.5 {
