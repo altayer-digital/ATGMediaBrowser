@@ -2,7 +2,23 @@
 
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 
-ATGMediaBrowser is an image slide-show viewer that supports multiple predefined transition styles, and also allows the client to define new transition styles. It supports both horizontal and vertical gestures to control transitions, and adding new transitions is fun and easy.
+ATGMediaBrowser is an image slide-show viewer that supports multiple predefined transition styles, and also allows the client to define new transition styles. It supports both horizontal and vertical gestures to control transitions, and adding new transitions is fun and easy. Checkout some of the transition styles below;
+
+**Vertical Zoom In Out**
+
+![](https://i.imgur.com/NfKfnoC.gif)
+
+**Horizontal Slide In**
+
+![](https://i.imgur.com/EmR7uU5.gif)
+
+**Horizontal Slide Out**
+
+![](https://i.imgur.com/v8wsKiF.gif)
+
+**Horizontal Move In Out**
+
+![](https://i.imgur.com/bx2a2iv.gif)
 
 It supports commonly expected features like pinch-zoom, double-tap-to-zoom, interactive dismiss transition, dismiss zoomed-out to target frame etc. You can choose between linear and carousel styles for the media browser.
 
