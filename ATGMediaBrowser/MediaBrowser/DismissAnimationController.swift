@@ -190,6 +190,9 @@ internal class DismissAnimationController: NSObject {
 
     private func createTransitionViews() {
 
+        backgroundView?.removeFromSuperview()
+        backgroundView = nil
+
         if let viewController = viewController,
             let bg = viewController.visualEffectContainer.snapshotView(afterScreenUpdates: true) {
             backgroundView = bg
