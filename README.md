@@ -164,7 +164,7 @@ If you implement the `func targetFrameForDismissal(_ mediaBrowser: MediaBrowserV
 
 ## Copyright and License
 
-ATGMediaBrowser is available under the MIT license. See [`LICENSE.md`](https://github.com/altayer-digital/ATGMediaBrowser/LICENSE.md) for more information.
+ATGMediaBrowser is available under the MIT license. See [`LICENSE.md`](https://github.com/altayer-digital/ATGMediaBrowser/blob/master/LICENSE.md) for more information.
 
 ## Contributors
 
