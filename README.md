@@ -1,6 +1,9 @@
 # ATGMediaBrowser
 
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
+[![CocoaPods](https://img.shields.io/cocoapods/v/ATGMediaBrowser.svg)](https://cocoapods.org/pods/ATGMediaBrowser)
+[![GitHub issues](https://img.shields.io/github/issues/altayer-digital/ATGMediaBrowser.svg)](https://github.com/altayer-digital/ATGMediaBrowser/issues)
+[![GitHub license](https://img.shields.io/github/license/altayer-digital/ATGMediaBrowser.svg)](https://github.com/altayer-digital/ATGMediaBrowser/blob/master/LICENSE.md)
 
 ATGMediaBrowser is an image slide-show viewer that supports multiple predefined transition styles, and also allows the client to define new transition styles. It supports both horizontal and vertical gestures to control transitions, and adding new transitions is fun and easy. Checkout some of the transition styles below;
 
