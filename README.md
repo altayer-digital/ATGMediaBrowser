@@ -24,10 +24,20 @@ It supports commonly expected features like pinch-zoom, double-tap-to-zoom, inte
 
 ## Installation
 
-ATGMediaBrowser can be installed using [Carthage](https://github.com/Carthage/Carthage). To do so, simply add the following line to your `Cartfile`:
+#### Carthage
+
+`ATGMediaBrowser` can be installed using [Carthage](https://github.com/Carthage/Carthage). To do so, simply add the following line to your `Cartfile`;
 
 ```
-github "altayer-digital/ATGMediaBrowser"
+github "altayer-digital/ATGMediaBrowser" ~> 1.0.0
+```
+
+#### Cocoapods
+
+To use `ATGMediaBrowser` with cocoapods, add the following line to the `Podfile`;
+
+```
+pod 'ATGMediaBrowser', '~> 1.0'
 ```
 
 ## Usage
@@ -43,14 +53,14 @@ present(mediaBrowser, animated: true, completion: nil)
 ```swift
 func numberOfItems(in mediaBrowser: MediaBrowserViewController) -> Int {
 
-// return number of images to be shown
+    // return number of images to be shown
 }
 
 func mediaBrowser(_ mediaBrowser: MediaBrowserViewController, imageAt index: Int, completion: @escaping MediaBrowserViewControllerDataSource.CompletionBlock) {
 
-// Fetch the required image here. Pass it to the completion
-// block along with the index, zoom scale, and error if any.
-completion(index, image, ZoomScale.default, nil)
+    // Fetch the required image here. Pass it to the completion
+    // block along with the index, zoom scale, and error if any.
+    completion(index, image, ZoomScale.default, nil)
 }
 ```
 
@@ -111,13 +121,13 @@ The draw order can be either ```previousToNext``` or ```nextToPrevious```.
 
 The ```ContentTransformer``` is a closure which should update the appearance of content views based on the position. When a content view is at position`0` the view should be visible to the user full screen. When the position is `-1`, the view should have the position and appearance of previous(top/left normally) item. When the position is `1`, the view must be at next(bottom/right) item's position.
 
-Below given is an exmaple for the transition ```horizontalMoveInOut```;
+Below given is an example for the transition ```horizontalMoveInOut```;
 
 ```
 public static let horizontalMoveInOut: ContentTransformer = { contentView, position in
 
-let widthIncludingGap = contentView.bounds.size.width + MediaContentView.interItemSpacing
-contentView.transform = CGAffineTransform(translationX: widthIncludingGap * position, y: 0.0)
+    let widthIncludingGap = contentView.bounds.size.width + MediaContentView.interItemSpacing
+    contentView.transform = CGAffineTransform(translationX: widthIncludingGap * position, y: 0.0)
 }
 ```
 
