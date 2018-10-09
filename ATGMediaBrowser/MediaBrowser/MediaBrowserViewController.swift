@@ -537,7 +537,9 @@ extension MediaBrowserViewController {
             closeButton.translatesAutoresizingMaskIntoConstraints = false
             var topAnchor = view.topAnchor
             if #available(iOS 11.0, *) {
-                topAnchor = view.safeAreaLayoutGuide.topAnchor
+                if view.responds(to: #selector(getter: UIView.safeAreaLayoutGuide)) {
+                    topAnchor = view.safeAreaLayoutGuide.topAnchor
+                }
             }
 
             NSLayoutConstraint.activate([
@@ -559,7 +561,9 @@ extension MediaBrowserViewController {
         pageControl.translatesAutoresizingMaskIntoConstraints = false
         var bottomAnchor = view.bottomAnchor
         if #available(iOS 11.0, *) {
-            bottomAnchor = view.safeAreaLayoutGuide.bottomAnchor
+            if view.responds(to: #selector(getter: UIView.safeAreaLayoutGuide)) {
+                bottomAnchor = view.safeAreaLayoutGuide.bottomAnchor
+            }
         }
         NSLayoutConstraint.activate([
             pageControl.bottomAnchor.constraint(equalTo: bottomAnchor, constant: Constants.PageControl.bottom),
