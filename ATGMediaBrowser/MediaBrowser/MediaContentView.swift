@@ -112,7 +112,7 @@ internal class MediaContentView: UIScrollView {
 
     private lazy var indicator: UIActivityIndicatorView = {
         let indicatorView = UIActivityIndicatorView()
-        indicatorView.activityIndicatorViewStyle = .whiteLarge
+        indicatorView.style = .whiteLarge
         indicatorView.hidesWhenStopped = true
         return indicatorView
     }()

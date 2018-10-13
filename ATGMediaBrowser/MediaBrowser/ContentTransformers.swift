@@ -191,7 +191,7 @@ public enum DefaultContentTransformers {
         let minScale: CGFloat = 0.5
         // Scale factor is used to reduce the scale animation speed.
         let scaleFactor: CGFloat = 0.5
-        var scale: CGFloat = CGFloat.maximum(minScale, 1.0 - fabs(position * scaleFactor))
+        var scale: CGFloat = CGFloat.maximum(minScale, 1.0 - abs(position * scaleFactor))
 
         // Actual gap will be scaleFactor * 0.5 times of contentView.bounds.size.width.
         let actualGap = contentView.bounds.size.width * scaleFactor * 0.5
@@ -217,7 +217,7 @@ public enum DefaultContentTransformers {
         let minScale: CGFloat = 0.5
         // Scale factor is used to reduce the scale animation speed.
         let scaleFactor: CGFloat = 0.5
-        let scale: CGFloat = CGFloat.maximum(minScale, 1.0 - fabs(position * scaleFactor))
+        let scale: CGFloat = CGFloat.maximum(minScale, 1.0 - abs(position * scaleFactor))
 
         // Actual gap will be scaleFactor * 0.5 times of contentView.bounds.size.height.
         let actualGap = contentView.bounds.size.height * scaleFactor * 0.5

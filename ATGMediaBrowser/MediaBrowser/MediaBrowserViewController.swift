@@ -630,8 +630,8 @@ extension MediaBrowserViewController {
             var toMove: CGFloat = 0.0
             let directionalVelocity = gestureDirection == .horizontal ? velocity.x : velocity.y
 
-            if fabs(directionalVelocity) < Constants.minimumVelocity &&
-                fabs(middleView.position) < Constants.minimumTranslation {
+            if abs(directionalVelocity) < Constants.minimumVelocity &&
+                abs(middleView.position) < Constants.minimumTranslation {
                 toMove = -middleView.position
             } else if directionalVelocity < 0.0 {
                 if middleView.position >= 0.0 {
@@ -708,7 +708,7 @@ extension MediaBrowserViewController {
             y: distance * (view.frame.size.height + gapBetweenMediaViews)
         )
         let directionalTranslation = (gestureDirection == .horizontal) ? translation.x : translation.y
-        if fabs(directionalTranslation) < 0.1 {
+        if abs(directionalTranslation) < 0.1 {
 
             moveViewsNormalized(by: CGPoint(x: distanceToMove, y: distanceToMove))
             distanceToMove = 0.0
@@ -773,9 +773,9 @@ extension MediaBrowserViewController {
 
             switch drawOrder {
             case .previousToNext:
-                mediaContainerView.bringSubview(toFront: previousView)
+                mediaContainerView.bringSubviewToFront(previousView)
             case .nextToPrevious:
-                mediaContainerView.sendSubview(toBack: previousView)
+                mediaContainerView.sendSubviewToBack(previousView)
             }
 
             delegate?.mediaBrowser(self, didChangeFocusTo: index)
@@ -798,9 +798,9 @@ extension MediaBrowserViewController {
 
             switch drawOrder {
             case .previousToNext:
-                mediaContainerView.sendSubview(toBack: nextView)
+                mediaContainerView.sendSubviewToBack(nextView)
             case .nextToPrevious:
-                mediaContainerView.bringSubview(toFront: nextView)
+                mediaContainerView.bringSubviewToFront(nextView)
             }
 
             delegate?.mediaBrowser(self, didChangeFocusTo: index)

@@ -79,7 +79,7 @@ internal class DismissAnimationController: NSObject {
         case .ended, .cancelled, .failed:
             var toMove: CGFloat = 0.0
 
-            if fabs(progressValue) > Constants.minimumTranslation {
+            if abs(progressValue) > Constants.minimumTranslation {
                 if let viewController = viewController,
                     let targetFrame = viewController.dataSource?.targetFrameForDismissal(viewController) {
 
@@ -87,7 +87,7 @@ internal class DismissAnimationController: NSObject {
                     return
 
                 } else {
-                    toMove = (progressValue / fabs(progressValue))
+                    toMove = (progressValue / abs(progressValue))
                 }
             } else {
                 toMove = -progressValue
@@ -152,7 +152,7 @@ internal class DismissAnimationController: NSObject {
             y: yDistance * (UIScreen.main.bounds.size.height)
         )
         let directionalTranslation = (gestureDirection == .horizontal) ? translation.y : translation.x
-        if fabs(directionalTranslation) < 1.0 {
+        if abs(directionalTranslation) < 1.0 {
 
             relativePosition.x += distanceToMove.x
             relativePosition.y += distanceToMove.y
@@ -230,7 +230,7 @@ internal class DismissAnimationController: NSObject {
         let directionalPosition = (gestureDirection == .horizontal) ? relativePosition.y : relativePosition.x
 
         if shouldZoomOutOnInteraction {
-            let scale = CGFloat.maximum(Constants.minimumZoomDuringInteraction, 1.0 - fabs(directionalPosition))
+            let scale = CGFloat.maximum(Constants.minimumZoomDuringInteraction, 1.0 - abs(directionalPosition))
             transform = transform.scaledBy(x: scale, y: scale)
         }
 
@@ -252,7 +252,7 @@ internal class DismissAnimationController: NSObject {
     }
 
 
-    private func imageViewFrame(for imageSize: CGSize, in frame: CGRect, mode: UIViewContentMode = .scaleAspectFit) -> CGRect {
+    private func imageViewFrame(for imageSize: CGSize, in frame: CGRect, mode: UIView.ContentMode = .scaleAspectFit) -> CGRect {
 
         guard imageSize != .zero,
             mode == .scaleAspectFit || mode == .scaleAspectFill else {
