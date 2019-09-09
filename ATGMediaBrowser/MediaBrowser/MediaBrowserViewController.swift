@@ -273,8 +273,7 @@ public class MediaBrowserViewController: UIViewController {
         }
 
         enum Title {
-            static let top: CGFloat = 8.0
-            static let fontSize: CGFloat = 16
+            static let top: CGFloat = 16.0
             static let textColor: UIColor = .white
             static let rect: CGRect = CGRect(x: 0, y: 0, width: 30, height: 30)
         }
@@ -349,7 +348,7 @@ public class MediaBrowserViewController: UIViewController {
 
     lazy var titleLabel: UILabel = { [unowned self] in
         let label = UILabel(frame: Constants.Title.rect)
-        label.font = UIFont.systemFont(ofSize: Constants.Title.fontSize)
+        label.font = UIFont.preferredFont(forTextStyle: .subheadline)
         label.textColor = Constants.Title.textColor
         label.textAlignment = .center
         label.text = ""
