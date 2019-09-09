@@ -451,6 +451,8 @@ extension MediaBrowserViewController {
 
         addPageControl()
 
+        addTitleLabel()
+
         view.addGestureRecognizer(panGestureRecognizer)
         view.addGestureRecognizer(tapGestureRecognizer)
     }
