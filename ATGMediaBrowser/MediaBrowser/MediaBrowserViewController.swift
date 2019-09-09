@@ -192,6 +192,18 @@ public class MediaBrowserViewController: UIViewController {
             contentViews.forEach({ $0.updateTransform() })
         }
     }
+    /// Variable to set title in media browser
+    public override var title: String? {
+        didSet {
+            titleLabel.text = title
+        }
+    }
+    /// Variable to hide/show title control in media browser.
+    public var shouldShowTitle: Bool = true {
+        didSet {
+            titleLabel.isHidden = !shouldShowTitle
+        }
+    }
     /// Variable to hide/show page control in media browser.
     public var shouldShowPageControl: Bool = true {
         didSet {
@@ -258,6 +270,13 @@ public class MediaBrowserViewController: UIViewController {
             static let bottom: CGFloat = -10.0
             static let tintColor: UIColor = .lightGray
             static let selectedTintColor: UIColor = .white
+        }
+
+        enum Title {
+            static let top: CGFloat = 8.0
+            static let fontSize: CGFloat = 16
+            static let textColor: UIColor = .white
+            static let rect: CGRect = CGRect(x: 0, y: 0, width: 30, height: 30)
         }
     }
 
@@ -326,6 +345,15 @@ public class MediaBrowserViewController: UIViewController {
         pageControl.tintColor = Constants.PageControl.tintColor
         pageControl.currentPage = index
         return pageControl
+    }()
+
+    lazy var titleLabel: UILabel = { [unowned self] in
+        let label = UILabel(frame: Constants.Title.rect)
+        label.font = UIFont.systemFont(ofSize: Constants.Title.fontSize)
+        label.textColor = Constants.Title.textColor
+        label.textAlignment = .center
+        label.text = ""
+        return label
     }()
 
     lazy internal private(set) var visualEffectContainer: UIView = UIView()
@@ -571,6 +599,24 @@ extension MediaBrowserViewController {
         ])
 
         controlViews.append(pageControl)
+    }
+
+    private func addTitleLabel() {
+        view.addSubview(titleLabel)
+
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        var topAnchor = view.topAnchor
+        if #available(iOS 11.0, *) {
+            if view.responds(to: #selector(getter: UIView.safeAreaLayoutGuide)) {
+                topAnchor = view.safeAreaLayoutGuide.topAnchor
+            }
+        }
+        NSLayoutConstraint.activate([
+            titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: Constants.Title.top),
+            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+            ])
+
+        controlViews.append(titleLabel)
     }
 
     private func hideControlViews(_ hide: Bool) {
