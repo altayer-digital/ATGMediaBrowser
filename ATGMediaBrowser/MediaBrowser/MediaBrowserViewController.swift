@@ -167,13 +167,9 @@ public class MediaBrowserViewController: UIViewController {
      ```
     */
     public struct TitleStyle {
-        var font: UIFont
-        var textColor: UIColor
-
-        init?(font: UIFont = UIFont.preferredFont(forTextStyle: .subheadline), textColor: UIColor = .white) {
-            self.font = font
-            self.textColor = textColor
-        }
+        public static var me: String = "mememe"
+        public var font: UIFont = UIFont.preferredFont(forTextStyle: .subheadline)
+        public var textColor: UIColor = .white
     }
 
     // MARK: - Exposed variables
@@ -211,11 +207,7 @@ public class MediaBrowserViewController: UIViewController {
         }
     }
     /// Variable to set title style in media browser.
-    public var titleStyle: TitleStyle? = TitleStyle(font: UIFont.preferredFont(forTextStyle: .subheadline), textColor: .white) {
-        didSet {
-            configTitle()
-        }
-    }
+    public var titleStyle: TitleStyle = TitleStyle()
     /// Variable to set title in media browser
     public override var title: String? {
         didSet {
@@ -372,8 +364,8 @@ public class MediaBrowserViewController: UIViewController {
 
     lazy var titleLabel: UILabel = {
         let label = UILabel(frame: Constants.Title.rect)
-        label.font = self.titleStyle?.font
-        label.textColor = self.titleStyle?.textColor
+        label.font = self.titleStyle.font
+        label.textColor = self.titleStyle.textColor
         label.textAlignment = .center
         return label
     }()
@@ -645,8 +637,8 @@ extension MediaBrowserViewController {
 
     private func configTitle() {
 
-        titleLabel.font = titleStyle?.font
-        titleLabel.textColor = titleStyle?.textColor
+        titleLabel.font = self.titleStyle.font
+        titleLabel.textColor = self.titleStyle.textColor
     }
 
     private func hideControlViews(_ hide: Bool) {
