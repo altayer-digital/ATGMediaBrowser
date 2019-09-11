@@ -161,7 +161,13 @@ Default is true. You can hide page control using the following code;
 ```
 mediaBrowser.shouldShowPageControl = false
 ```
+##### Show title
 
+Default is true. You can hide title using the following code;
+
+```
+mediaBrowser.shouldShowTitle = false
+```
 ##### Hiding controls
 
 By controls, we mean both page control and close button. You can set it to auto-hide using `autoHideControls` or show/hide them manually using `hideControls`.
@@ -186,6 +192,10 @@ You can access the current index of the item in media browser using `currentItem
 You can customize the close button using the data source call back `func mediaBrowser(_ mediaBrowser: MediaBrowserViewController, updateCloseButton button: UIButton)`. You will be getting a `UIButton` instance in there, and you can customize the appearance, use auto-layout constraints to position it, even add target to get touch events on them. 
 
 If you do not add any constraints to the button, media browser will automatically add required constraints to keep it on top right of the screen.
+
+### Customizing title
+
+Normally you can set `title` of `mediaBrowser`. You also can customize display title using delegate `func mediaBrowser(_ mediaBrowser: ATGMediaBrowser.MediaBrowserViewController, didChangeFocusTo index: Int)` to display change of item index.
 
 #### Dismissing the media browser into target frame
 
