@@ -158,6 +158,11 @@ public class MediaBrowserViewController: UIViewController {
         case nextToPrevious
     }
 
+    public struct TitleStyle {
+        public static var font: UIFont = UIFont.preferredFont(forTextStyle: .subheadline)
+        public static var textColor: UIColor = .white
+    }
+
     // MARK: - Exposed variables
 
     /// Data-source object to supply media browser contents.
@@ -198,8 +203,8 @@ public class MediaBrowserViewController: UIViewController {
             titleLabel.text = title
         }
     }
-    /// Variable to hide/show title control in media browser.
-    public var shouldShowTitle: Bool = true {
+    /// Variable to hide/show title control in media browser. Default is false.
+    public var shouldShowTitle: Bool = false {
         didSet {
             titleLabel.isHidden = !shouldShowTitle
         }
@@ -346,12 +351,11 @@ public class MediaBrowserViewController: UIViewController {
         return pageControl
     }()
 
-    lazy var titleLabel: UILabel = { [unowned self] in
+    lazy var titleLabel: UILabel = {
         let label = UILabel(frame: Constants.Title.rect)
-        label.font = UIFont.preferredFont(forTextStyle: .subheadline)
-        label.textColor = Constants.Title.textColor
+        label.font = TitleStyle.font
+        label.textColor = TitleStyle.textColor
         label.textAlignment = .center
-        label.text = ""
         return label
     }()
 
@@ -603,8 +607,8 @@ extension MediaBrowserViewController {
     }
 
     private func addTitleLabel() {
-        view.addSubview(titleLabel)
 
+        view.addSubview(titleLabel)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         var topAnchor = view.topAnchor
         if #available(iOS 11.0, *) {
