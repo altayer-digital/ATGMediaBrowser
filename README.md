@@ -163,10 +163,10 @@ mediaBrowser.shouldShowPageControl = false
 ```
 ##### Show title
 
-Default is true. You can hide title using the following code;
+Default is false. You can show title using the following code;
 
 ```
-mediaBrowser.shouldShowTitle = false
+mediaBrowser.shouldShowTitle = true
 ```
 ##### Hiding controls
 
@@ -195,7 +195,7 @@ If you do not add any constraints to the button, media browser will automaticall
 
 ### Customizing title
 
-Normally you can set `title` of `mediaBrowser`. You also can customize display title using delegate `func mediaBrowser(_ mediaBrowser: ATGMediaBrowser.MediaBrowserViewController, didChangeFocusTo index: Int)` to display change of item index.
+Normally you can set `title` of `mediaBrowser`. You also can customize display title using delegate `func mediaBrowser(_ mediaBrowser: ATGMediaBrowser.MediaBrowserViewController, didChangeFocusTo index: Int)` to display appropriate title for the changed item index.
 
 #### Dismissing the media browser into target frame
 
