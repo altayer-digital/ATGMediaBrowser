@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "ATGMediaBrowser"
-  s.version      = "1.1.0"
+  s.version      = "1.2.0"
   s.summary      = "Image slide show viewer with multiple predefined transition styles, and with ability to create new transitions with ease."
 
   s.swift_version= "5.0"
