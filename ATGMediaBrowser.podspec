@@ -4,7 +4,7 @@ Pod::Spec.new do |s|
   s.version      = "1.1.0"
   s.summary      = "Image slide show viewer with multiple predefined transition styles, and with ability to create new transitions with ease."
 
-  s.swift_version= "4.2"
+  s.swift_version= "5.0"
 
   s.description  = <<-DESC
 ATGMediaBrowser is an image slide show viewer that supports multiple predefined transition styles, and also allows the client to define new transition styles. It supports both horizontal and vertical gestures to control transitions, and adding new transitions is fun and easy.

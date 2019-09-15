@@ -115,7 +115,7 @@
 				TargetAttributes = {
 					961F47AA20FCBFF600DEF28F = {
 						CreatedOnToolsVersion = 9.3;
-						LastSwiftMigration = 1010;
+						LastSwiftMigration = 1100;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -126,6 +126,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = 961F47A120FCBFF600DEF28F;
 			productRefGroup = 961F47AC20FCBFF600DEF28F /* Products */;
@@ -298,7 +299,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.altayer.ATGMediaBrowser;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -320,7 +321,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.altayer.ATGMediaBrowser;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
