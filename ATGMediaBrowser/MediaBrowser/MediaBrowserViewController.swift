@@ -296,7 +296,6 @@ public class MediaBrowserViewController: UIViewController {
 
         enum Title {
             static let top: CGFloat = 16.0
-            static let textColor: UIColor = .white
             static let rect: CGRect = CGRect(x: 0, y: 0, width: 30, height: 30)
         }
     }
