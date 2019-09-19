@@ -167,8 +167,10 @@ public class MediaBrowserViewController: UIViewController {
      ```
     */
     public struct TitleStyle {
-        public static var me: String = "mememe"
+
+        /// Title style font
         public var font: UIFont = UIFont.preferredFont(forTextStyle: .subheadline)
+        /// Title style text color.
         public var textColor: UIColor = .white
     }
 
@@ -207,7 +209,11 @@ public class MediaBrowserViewController: UIViewController {
         }
     }
     /// Variable to set title style in media browser.
-    public var titleStyle: TitleStyle = TitleStyle()
+    public var titleStyle: TitleStyle = TitleStyle() {
+        didSet {
+            configureTitleLabel()
+        }
+    }
     /// Variable to set title in media browser
     public override var title: String? {
         didSet {
@@ -635,7 +641,7 @@ extension MediaBrowserViewController {
         controlViews.append(titleLabel)
     }
 
-    private func configTitle() {
+    private func configureTitleLabel() {
 
         titleLabel.font = self.titleStyle.font
         titleLabel.textColor = self.titleStyle.textColor
